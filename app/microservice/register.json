@@ -1,0 +1,26 @@
+{
+    "id": "#(service.id)",
+    "name": "#(service.name)",
+    "urls": [{
+        "url": "/convert/fs2SQL",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v1/convert/fs2SQL"
+        }]
+    }, {
+        "url": "/convert/sql2FS",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v1/convert/sql2FS"
+        }]
+    }, {
+        "url": "/convert/checkSQL",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v1/convert/checkSQL"
+        }]
+    }]
+}

@@ -1,0 +1,8 @@
+{
+    "logger": {
+        "name": "converter-STAGING",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    }
+}

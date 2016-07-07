@@ -1,0 +1,8 @@
+{
+    "logger": {
+        "name": "converter-api",
+        "level": "info",
+        "toFile": false,
+        "dirLogFile": null
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "logger": {
+        "name": "converter-TEST",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    }
+}

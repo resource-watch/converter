@@ -1,0 +1,13 @@
+{
+    "logger": {
+        "name": "converter-DEV",
+        "level": "debug",
+        "toFile": false,
+        "dirLogFile": null
+    },
+    "service": {
+        "id": "conveter-api_1.0.0",
+        "name": "Converter API",
+        "port": 4100
+    }
+}

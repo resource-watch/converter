@@ -1,0 +1,8 @@
+base:
+  build: .
+  ports:
+    - "4100:4100"
+  environment:
+    PORT: 4100
+    NODE_PATH: app/src
+  container_name: converter
