@@ -13,7 +13,7 @@ produces:
 
 # will be prefixed to all paths
 basePath: /api/v1
-
+ 
 paths:
   /convert/checkSQL:
     get:
