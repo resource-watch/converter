@@ -4,7 +4,7 @@ info:
   description: Converter API
   version: "1.0.0"
 
-schemes:
+schemes: 
   - https
   - http
 
@@ -13,7 +13,7 @@ produces:
 
 # will be prefixed to all paths
 basePath: /api/v1
- 
+
 paths:
   /convert/checkSQL:
     get:
