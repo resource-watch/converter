@@ -11,11 +11,11 @@ class ConverterService {
 
     static obtainSelect(fs){
         let result = '';
-        if(!fs.select && !fs.outStatistics){
+        if(!fs.outFields && !fs.outStatistics){
             return '*';
         }
-        if(fs.select){
-            result = fs.select;
+        if(fs.outFields){
+            result = fs.outFields;
         }
         if(fs.outStatistics){
             try{
@@ -23,7 +23,10 @@ class ConverterService {
                 let statistics = JSON.parse(fs.outStatistics);
                 if(statistics){
                     for(let i=0, length = statistics.length; i < length; i++){
-                        result += `, ${statistics[i].statisticType}(${statistics[i].onStatisticField}) ${statistics[i].outStatisticFieldName ? ` AS ${statistics[i].outStatisticFieldName} `: ''}`;
+                        if(result){
+                            result += ', ';
+                        }
+                        result += `${statistics[i].statisticType}(${statistics[i].onStatisticField}) ${statistics[i].outStatisticFieldName ? ` AS ${statistics[i].outStatisticFieldName} `: ''}`;
                     }
                 }
             } catch(err){
@@ -68,7 +71,7 @@ class ConverterService {
         obtainColAggrRegex.lastIndex = 0;
         obtainColAggrRegex.lastIndex = 0;
         if(ast.select && ast.select.length > 0){
-            let select = '';
+            let outFields = '';
             let outStatistics = [];
             for(let i = 0, length = ast.select.length; i < length; i++){
 
@@ -92,14 +95,14 @@ class ConverterService {
                         };
                     }
                 } else {
-                    if(select !== ''){
-                        select += ',';
+                    if(outFields !== ''){
+                        outFields += ',';
                     }
-                    select += ast.select[i].expression;
+                    outFields += ast.select[i].expression;
                 }
 
             }
-            fs.select = select;
+            fs.outFields = outFields;
             if(outStatistics && outStatistics.length > 0){
                 fs.outStatistics = JSON.stringify(outStatistics);
             }
