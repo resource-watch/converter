@@ -62,10 +62,11 @@ class ConverterService {
     }
 
     static obtainFSFromAST(ast){
-        aggrFunctionsRegex.lastIndex = 0;
-        obtainColAggrRegex.lastIndex = 0;
         logger.info('Generating FeatureService object from ast object');
+        logger.debug(ast);
         let fs = {};
+        obtainColAggrRegex.lastIndex = 0;
+        obtainColAggrRegex.lastIndex = 0;
         if(ast.select && ast.select.length > 0){
             let select = '';
             let outStatistics = [];
