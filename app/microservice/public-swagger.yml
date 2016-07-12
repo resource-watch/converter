@@ -4,7 +4,7 @@ info:
   description: Converter API
   version: "1.0.0"
 
-schemes: 
+schemes:
   - https
   - http
 
@@ -50,7 +50,7 @@ paths:
           description: Name of the table
           required: false
           type: string
-        - name: select
+        - name: outFields
           in: query
           description: Select param of the feature service (example 'COL1,COL2 AS COL')
           required: false
@@ -208,7 +208,7 @@ definitions:
       tableName:
         type: string
         description: Name of the table
-      select:
+      outFields:
         type: string
         description: Select columns
       where:
