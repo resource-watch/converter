@@ -66,19 +66,19 @@ class ConverterService {
 
     static obtainFSFromAST(ast){
         logger.info('Generating FeatureService object from ast object');
-        logger.debug(ast);
         let fs = {};
-        obtainColAggrRegex.lastIndex = 0;
-        obtainColAggrRegex.lastIndex = 0;
+
         if(ast.select && ast.select.length > 0){
             let outFields = '';
             let outStatistics = [];
             for(let i = 0, length = ast.select.length; i < length; i++){
-
+                obtainColAggrRegex.lastIndex = 0;
+                aggrFunctionsRegex.lastIndex = 0;
                 if(aggrFunctionsRegex.test(ast.select[i].expression)){
                     //aggr function
                     let parts = obtainColAggrRegex.exec(ast.select[i].expression);
                     let obj = null;
+
                     if(parts && parts.length > 1){
                         obj = {
                             onStatisticField: parts[1],

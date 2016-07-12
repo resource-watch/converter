@@ -149,12 +149,16 @@ describe('SQLService', function() {
     });
 
     it('SQL to Feature Servicee correct (select with group by)', function*() {
-        let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
+        let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD, avg(COL2) as another FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
 
         let outStatistics = [{
             'statisticType': 'count',
             'onStatisticField': 'FIELD',
             'outStatisticFieldName': 'OUTFIELD'
+        },{
+            'statisticType': 'avg',
+            'onStatisticField': 'COL2',
+            'outStatisticFieldName': 'another'
         }];
         let resultFs = {
             outFields: 'COL1,COL2 AS COL',
@@ -172,7 +176,7 @@ describe('SQLService', function() {
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
         result.fs.should.have.property('outStatistics');
         let outStatisticsResult = JSON.parse(result.fs.outStatistics);
-        outStatistics.should.length(1);
+        outStatistics.should.length(2);
         outStatisticsResult[0].should.have.property('statisticType',resultFs.outStatistics[0].statisticType);
         outStatisticsResult[0].should.have.property('outStatisticFieldName',resultFs.outStatistics[0].outStatisticFieldName);
         outStatisticsResult[0].should.have.property('onStatisticField',resultFs.outStatistics[0].onStatisticField);
@@ -259,9 +263,6 @@ describe('SQLService', function() {
         result.should.have.property('message');
 
     });
-
-
-
 
     after(function*() {
 
