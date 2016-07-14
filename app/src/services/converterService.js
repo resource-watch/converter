@@ -4,7 +4,7 @@ var logger = require('logger');
 var SQLService = require('services/sqlService');
 
 let aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
-let aggrFunctionsRegex = /(count|sum|min|max|avg|stddev|var){1}[A-Za-z0-9_]*/g;
+let aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
 let obtainColAggrRegex = /\((.*?)\)/g;
 
 class ConverterService {
@@ -78,7 +78,6 @@ class ConverterService {
                     //aggr function
                     let parts = obtainColAggrRegex.exec(ast.select[i].expression);
                     let obj = null;
-
                     if(parts && parts.length > 1){
                         obj = {
                             onStatisticField: parts[1],
