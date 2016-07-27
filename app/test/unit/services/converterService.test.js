@@ -2,7 +2,7 @@
 var logger = require('logger');
 var should = require('should');
 var assert = require('assert');
-var ConverterService = require('services/ConverterService');
+var ConverterService = require('services/converterService');
 
 describe('SQLService', function() {
 
