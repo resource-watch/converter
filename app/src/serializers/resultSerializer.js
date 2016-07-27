@@ -2,7 +2,7 @@
 
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 var resultSerializer = new JSONAPISerializer('result', {
-    attributes: ['sql', 'hash', 'providers'],
+    attributes: ['query'],
     typeForAttribute: function(attribute, record) {
         return attribute;
     }

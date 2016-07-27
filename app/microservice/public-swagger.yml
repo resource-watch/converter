@@ -1,9 +1,8 @@
 swagger: '2.0'
 info:
-  title: GFW GeoStore API
-  description: Global Forest Watch - GeoStore API
+  title: Converter API
+  description: Converter API
   version: "1.0.0"
-host: api.gfw.com
 
 schemes:
   - https
@@ -13,27 +12,81 @@ produces:
   - application/vnd.api+json
 
 paths:
-  /geostore/{id}:
+  /convert/checkSQL:
     get:
-      description: Returns geostore based on a single ID, if the geostore not exist return 404
-      operationId: getGeoStoreById
+      summary: Check if sql is correct
+      operationId: checkSQL
       produces:
         - application/vnd.api+json
       tags:
-        - GeoStore
+        - CONVERT
       parameters:
-        - name: id
-          in: path
-          description: ID of geostore to fetch
+        - name: sql
+          in: query
+          description: SQL to check
           required: true
+          type: string
+
+      responses:
+        200:
+          description: SQL Correct
+        400:
+          description: Error in sql
+          schema:
+            $ref: '#/definitions/Errors'
+
+  /convert/fs2SQL:
+    get:
+      summary: Feature service to SQL
+      description: Return generated sql from feature service params. Documentation of feature service (http://resources.arcgis.com/en/help/arcgis-rest-api/#/Query_Feature_Service_Layer/02r3000000r1000000/)
+      operationId: fs2SQL
+      produces:
+        - application/vnd.api+json
+      tags:
+        - CONVERT
+      parameters:
+        - name: tableName
+          in: query
+          description: Name of the table
+          required: false
+          type: string
+        - name: outFields
+          in: query
+          description: Select param of the feature service (example 'COL1,COL2 AS COL')
+          required: false
+          type: string
+        - name: where
+          in: query
+          description: Where param of the feature service (example 'COL1 = \'juan\' and COL2=2')
+          required: false
+          type: string
+        - name: outStatistics
+          in: query
+          description: outStatistics param of the feature service (example '[{"statisticType":"count","onStatisticField":"FIELD","outStatisticFieldName":"OUTFIELD"}]')
+          required: false
+          type: string
+        - name: groupByFieldsForStatistics
+          in: query
+          description: groupByFieldsForStatistics param of the feature service (example 'COL2')
+          required: false
+          type: string
+        - name: resultRecordCount
+          in: query
+          description: resultRecordCount param of the feature service (example 10)
+          required: false
+          type: number
+        - name: orderByFields
+          in: query
+          description: orderByFields param of the feature service (example 'COL1 ASC,COL2 DESC')
+          required: false
           type: string
       responses:
         200:
-          description: Geostore obtained
+          description: SQL obtained
           schema:
-            $ref: '#/definitions/GeoStoreAPI'
-        404:
-          description: Geostore not found
+            $ref: '#/definitions/SQLAPI'
+        400:
+          description: Error in transform
           schema:
             $ref: '#/definitions/Errors'
         500:
@@ -44,29 +97,29 @@ paths:
           description: unexpected error
           schema:
             $ref: '#/definitions/Errors'
-  /geostore:
-    post:
-      summary: Create geostore
-      description: Create Geostore
+  /convert/sql2FS:
+    get:
+      summary: SQL to Feature service
+      description: Return generated feature service object from sql param. Only support SELECT, WHERE, ORDER BY, GROUP BY, LIMIT, AS, aggregate functions (count, sum, min, max, avg, stddev, var)
+      operationId: sql2FS
       produces:
         - application/vnd.api+json
       tags:
-        - GeoStore
-      operationId: createGeoStore
+        - CONVERT
       parameters:
-        - name: geoStore
-          in: body
-          description: GeoStore to save
+        - name: sql
+          in: query
+          description: SQL to convert
           required: true
-          schema:
-            $ref: '#/definitions/Features'
+          type: string
+
       responses:
         200:
-          description: The object created
+          description: FS obtained
           schema:
-            $ref: '#/definitions/GeoStoreAPI'
+            $ref: '#/definitions/FSAPI'
         400:
-          description: Validate error
+          description: Error in transform
           schema:
             $ref: '#/definitions/Errors'
         500:
@@ -74,7 +127,7 @@ paths:
           schema:
             $ref: '#/definitions/Errors'
         default:
-          description: Unexpected error
+          description: unexpected error
           schema:
             $ref: '#/definitions/Errors'
 
@@ -128,16 +181,15 @@ definitions:
         type: object
         description: A meta object containing non-standard meta-information about the error.
 
-
-  GeoStoreAPI:
+  FSAPI:
     type: object
     properties:
       data:
         type: array
         items:
-          $ref: '#/definitions/GeoJSON'
+          $ref: '#/definitions/FS'
 
-  GeoJSON:
+  FS:
     type: object
     properties:
       type:
@@ -149,57 +201,60 @@ definitions:
       attributes:
         properties:
           schema:
-            $ref: '#/definitions/GEOJSONBody'
-  GEOJSONBody:
+            $ref: '#/definitions/FSBody'
+  FSBody:
     type: object
     properties:
-      areaHa:
+      tableName:
+        type: string
+        description: Name of the table
+      outFields:
+        type: string
+        description: Select columns
+      where:
+        type: string
+        description: Filters
+      outStatistics:
+        type: string
+        description: Aggregate columns
+      groupByFieldsForStatistics:
+        type: string
+        description: Group by
+      resultRecordCount:
         type: number
-        format: float
-        description: Area in Ha
-      hash:
+        description: Num elems
+      supportsPagination:
+        type: boolean
+        description: Param required to do limit
+      orderByFields:
         type: string
-        description: Id of geostore
-      geojson:
+        description: Order by
+
+
+  SQLAPI:
+    type: object
+    properties:
+      data:
         type: array
-        description: Features
         items:
-          $ref: '#/definitions/Feature'
-  Features:
+          $ref: '#/definitions/SQL'
+
+  SQL:
     type: object
     properties:
       type:
         type: string
-        description: Type of feature
-      features:
-        type: array
-        description: Features
-        items:
-          $ref: '#/definitions/Feature'
-  Feature:
-    type: object
-    properties:
-      type:
+        description: Resource type
+      id:
         type: string
-        description: Type of feature
-      properties:
-        type: object
-        description: Feature
-      geometry:
-        type: object
-        description: Geometries
+        description: Resource id
+      attributes:
         properties:
           schema:
-            $ref: '#/definitions/Geometry'
-
-  Geometry:
+            $ref: '#/definitions/SQLBody'
+  SQLBody:
     type: object
     properties:
-      type:
+      sql:
         type: string
-        description: Geometry type
-      coordinates:
-        type: array
-        description: Coordinates array
-        items:
-          type: object
+        description: Result SQL

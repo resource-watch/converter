@@ -13,7 +13,7 @@ describe('SQLService', function() {
     it('Feature Service correct (only select)', function*() {
         let resultSQL = 'SELECT * FROM table';
         let fs = {
-            select: '*'
+            outFields: '*'
         };
         let tableName = 'table';
         let result = ConverterService.fs2SQL(fs, tableName);
@@ -24,7 +24,7 @@ describe('SQLService', function() {
     it('Feature Service correct (select with columns)', function*() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table';
         let fs = {
-            select: 'COL1, COL2 AS COL'
+            outFields: 'COL1, COL2 AS COL'
         };
         let tableName = 'table';
         let result = ConverterService.fs2SQL(fs, tableName);
@@ -35,7 +35,7 @@ describe('SQLService', function() {
     it('Feature Service correct (select with where)', function*() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table WHERE COL1 = \'juan\' and COL2=2';
         let fs = {
-            select: 'COL1, COL2 AS COL',
+            outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2'
         };
         let tableName = 'table';
@@ -53,7 +53,7 @@ describe('SQLService', function() {
             'outStatisticFieldName': 'OUTFIELD'
         }];
         let fs = {
-            select: 'COL1, COL2 AS COL',
+            outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: JSON.stringify(outStatistics),
             groupByFieldsForStatistics: 'COL2'
@@ -72,7 +72,7 @@ describe('SQLService', function() {
             'outStatisticFieldName': 'OUTFIELD'
         }];
         let fs = {
-            select: 'COL1, COL2 AS COL',
+            outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: JSON.stringify(outStatistics),
             groupByFieldsForStatistics: 'COL2',
@@ -92,7 +92,7 @@ describe('SQLService', function() {
             'outStatisticFieldName': 'OUTFIELD'
         }];
         let fs = {
-            select: 'COL1, COL2 AS COL',
+            outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: JSON.stringify(outStatistics),
             groupByFieldsForStatistics: 'COL2',
@@ -108,14 +108,14 @@ describe('SQLService', function() {
     it('SQL to Feature Service', function*() {
         let sql = 'SELECT * FROM table';
         let resultFs = {
-            select: '*',
+            outFields: '*',
             tableName: 'table'
         };
         let tableName = 'table';
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
     });
 
@@ -123,41 +123,45 @@ describe('SQLService', function() {
     it('SQL to Feature Service', function*() {
         let sql = 'SELECT COL1, COL2 AS COL FROM table';
         let resultFs = {
-            select: 'COL1,COL2 AS COL',
+            outFields: 'COL1,COL2 AS COL',
             tableName: 'table'
         };
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
     });
 
     it('SQL to Feature Servicee correct (select with where)', function*() {
         let sql = 'SELECT COL1, COL2 AS COL FROM table WHERE COL1 = \'juan\' and COL2=2';
         let resultFs = {
-            select: 'COL1,COL2 AS COL',
+            outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             tableName: 'table'
         };
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
     });
 
     it('SQL to Feature Servicee correct (select with group by)', function*() {
-        let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
+        let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD, avg(COL2) as another FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
 
         let outStatistics = [{
             'statisticType': 'count',
             'onStatisticField': 'FIELD',
             'outStatisticFieldName': 'OUTFIELD'
+        },{
+            'statisticType': 'avg',
+            'onStatisticField': 'COL2',
+            'outStatisticFieldName': 'another'
         }];
         let resultFs = {
-            select: 'COL1,COL2 AS COL',
+            outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: outStatistics,
             groupByFieldsForStatistics: 'COL2',
@@ -166,13 +170,13 @@ describe('SQLService', function() {
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
         result.fs.should.have.property('outStatistics');
         let outStatisticsResult = JSON.parse(result.fs.outStatistics);
-        outStatistics.should.length(1);
+        outStatistics.should.length(2);
         outStatisticsResult[0].should.have.property('statisticType',resultFs.outStatistics[0].statisticType);
         outStatisticsResult[0].should.have.property('outStatisticFieldName',resultFs.outStatistics[0].outStatisticFieldName);
         outStatisticsResult[0].should.have.property('onStatisticField',resultFs.outStatistics[0].onStatisticField);
@@ -187,7 +191,7 @@ describe('SQLService', function() {
             'outStatisticFieldName': 'OUTFIELD'
         }];
         let resultFs = {
-            select: 'COL1,COL2 AS COL',
+            outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: outStatistics,
             groupByFieldsForStatistics: 'COL2',
@@ -198,7 +202,7 @@ describe('SQLService', function() {
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
@@ -222,7 +226,7 @@ describe('SQLService', function() {
             'outStatisticFieldName': 'OUTFIELD'
         }];
         let resultFs = {
-            select: 'COL1,COL2 AS COL',
+            outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: outStatistics,
             groupByFieldsForStatistics: 'COL2',
@@ -234,7 +238,7 @@ describe('SQLService', function() {
         let result = ConverterService.sql2FS(sql);
         result.should.not.be.null();
         result.should.have.property('fs');
-        result.fs.should.have.property('select',resultFs.select);
+        result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
@@ -259,9 +263,6 @@ describe('SQLService', function() {
         result.should.have.property('message');
 
     });
-
-
-
 
     after(function*() {
 

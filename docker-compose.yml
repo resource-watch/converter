@@ -1,7 +1,7 @@
 prod:
   image: vizzuality/converter:1.0.0${STAGING}
   ports:
-    - "3600"
+    - "4100"
   env_file:
     - prod.env
   command: start
