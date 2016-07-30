@@ -1,6 +1,7 @@
 {
     "id": "#(service.id)",
     "name": "#(service.name)",
+    "tags": ["rw"],
     "urls": [{
         "url": "/convert/fs2SQL",
         "method": "GET",
