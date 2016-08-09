@@ -101,7 +101,9 @@ class ConverterService {
                 }
 
             }
-            fs.outFields = outFields;
+            if(outFields) {
+                fs.outFields = outFields;
+            }
             if(outStatistics && outStatistics.length > 0){
                 fs.outStatistics = JSON.stringify(outStatistics);
             }
