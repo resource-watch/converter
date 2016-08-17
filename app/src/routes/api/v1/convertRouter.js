@@ -45,7 +45,7 @@ class ConvertRouter {
     static * sql2FS() {
         logger.info('SQL2FS with sql ', this.query.sql);
         this.assert(this.query.sql, 400, 'Sql param required');
-        let result = ConverterService.sql2FS(this.query.sql);
+        let result = ConverterService.sql2FS(this.query.sql.trim());
         if (result && result.error) {
             this.throw(400, result.message);
             return;
@@ -58,7 +58,7 @@ class ConvertRouter {
     static * checkSQL() {
         logger.info('CheckSQL with sql ', this.query.sql);
         this.assert(this.query.sql, 400, 'Sql param required');
-        let result = SQLService.checkSQL(this.query.sql);
+        let result = SQLService.checkSQL(this.query.sql.trim());
         if (result && result.error) {
             this.throw(400, result.message);
             return;

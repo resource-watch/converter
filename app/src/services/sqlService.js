@@ -28,6 +28,7 @@ class SQLService {
         logger.info('Checking sql ', sql);
         let ast = simpleSqlParser.sql2ast(sql);
         if (!ast.status){
+            logger.debug(ast);
             return SQLService.generateError('Malformed query');
         }
         return SQLService.correctSQL(ast.value);
