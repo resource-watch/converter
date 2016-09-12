@@ -53,7 +53,7 @@ server.listen(port, function() {
     });
     p.then(function() {}, function(err) {
         logger.error(err);
-        process.exit(1);
+        // process.exit(1);
     });
 });
 

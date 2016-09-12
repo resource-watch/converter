@@ -105,7 +105,7 @@ describe('SQLService', function() {
     });
 
     it('Feature Service correct (select with geometry intersec)', function*() {
-        let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_AsGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'))';
+        let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'), 4326))';
         let fs = {
             geometry: '{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}'
         };
@@ -276,7 +276,7 @@ describe('SQLService', function() {
     });
 
     it('SQL to Feature Service correct (select with geometry intersec)', function*() {
-        let sql = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_AsGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'))';
+        let sql = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_GeomFromGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'))';
         let fs = {
 
         };
