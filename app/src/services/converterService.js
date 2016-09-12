@@ -3,9 +3,11 @@
 var logger = require('logger');
 var SQLService = require('services/sqlService');
 
-let aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
-let aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
-let obtainColAggrRegex = /\((.*?)\)/g;
+const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
+const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
+const OBTAIN_GEOJSON = /[.]*st_asgeojson\(['|"]([^\)]*)['|"]\)/g;
+const CONTAIN_INTERSEC = /[.]*([and | or]*st_intersects.*)\)/g;
+const obtainColAggrRegex = /\((.*?)\)/g;
 
 class ConverterService {
 
@@ -37,10 +39,30 @@ class ConverterService {
         return result;
     }
 
+    static obtainWhere(fs) {
+        logger.debug(fs);
+        let where = '';
+        if (fs.where) {
+            if (!where){
+                where = 'WHERE ';
+            }
+            where += fs.where;
+        }
+        if (fs.geometry) {
+            if (!where){
+                where = 'WHERE ';
+            } else {
+                where += ' AND ';
+            }
+            where += `ST_INTERSECTS(the_geom, ST_AsGeoJSON('${fs.geometry}'))`;
+        }
+        return where;
+    }
+
     static fs2SQL(fs, tableName){
         logger.info('Creating query from featureService');
         let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${tableName}
-                ${fs.where ? `WHERE ${fs.where}` : ''}
+                ${ConverterService.obtainWhere(fs)}
                 ${fs.groupByFieldsForStatistics ? `GROUP BY ${fs.groupByFieldsForStatistics} `:'' }
                 ${fs.orderByFields ? `ORDER BY ${fs.orderByFields} `: ''}
                 ${fs.resultRecordCount ? `LIMIT ${fs.resultRecordCount }`: ''}`.replace(/\s\s+/g, ' ').trim();
@@ -62,6 +84,50 @@ class ConverterService {
             }
         }
         return null;
+    }
+
+    static convertGeoJSONToEsriGJSON(geojson) {
+        if(geojson.type === 'Polygon'){
+            geojson.rings = geojson.coordinates;
+            delete geojson.coordinates;
+        } else if(geojson.type === 'MultiPolygon') {
+            geojson.rings = geojson.coordinates[0];
+            delete geojson.coordinates;
+        }
+        geojson.type = 'polygon';
+        return geojson;
+    }
+
+    static parseWhere(where) {
+        logger.debug('Parsing where', where);
+        CONTAIN_INTERSEC.lastIndex = 0;
+        OBTAIN_GEOJSON.lastIndex = 0;
+        const whereLower = where.toLowerCase();
+        const result = {
+            where,
+        };
+        if (CONTAIN_INTERSEC.test(whereLower)) {
+            CONTAIN_INTERSEC.lastIndex = 0;
+            let resultIntersec = CONTAIN_INTERSEC.exec(whereLower)[0];
+            let pos = whereLower.indexOf(resultIntersec);
+            result.where = `${where.substring(0, pos)} ${where.substring(pos + resultIntersec.length, where.length)}`.trim();
+            if (!result.where) {
+                delete result.where;
+            }
+
+            let geojson = OBTAIN_GEOJSON.exec(whereLower);
+            if (geojson && geojson.length > 1){
+                result.spatialRel = 'esriSpatialRelIntersects';
+                result.geometryType = 'esriGeometryPolygon';
+                result.inSR = JSON.stringify({
+                    wkid: 4326
+                });
+                console.log(geojson[0]);
+                result.geometry = JSON.stringify(ConverterService.convertGeoJSONToEsriGJSON(JSON.parse(geojson[1])));
+            }
+        }
+
+        return result;
     }
 
     static obtainFSFromAST(ast){
@@ -112,7 +178,7 @@ class ConverterService {
             fs.tableName = ast.from[0].expression;
         }
         if(ast.where){
-            fs.where = ast.where.expression;
+            fs = Object.assign({}, fs, ConverterService.parseWhere(ast.where.expression));
         }
         if(ast.group && ast.group.length > 0){
             let groupByFieldsForStatistics = '';

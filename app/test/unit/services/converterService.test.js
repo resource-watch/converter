@@ -104,6 +104,17 @@ describe('SQLService', function() {
         result.sql.should.be.equal(resultSQL);
     });
 
+    it('Feature Service correct (select with geometry intersec)', function*() {
+        let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_AsGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'))';
+        let fs = {
+            geometry: '{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}'
+        };
+        let tableName = 'table';
+        let result = ConverterService.fs2SQL(fs, tableName);
+        result.sql.should.be.equal(resultSQL);
+    });
+
+
 
     it('SQL to Feature Service', function*() {
         let sql = 'SELECT * FROM table';
@@ -262,6 +273,33 @@ describe('SQLService', function() {
         result.should.have.property('error', true);
         result.should.have.property('message');
 
+    });
+
+    it('SQL to Feature Service correct (select with geometry intersec)', function*() {
+        let sql = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_AsGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'))';
+        let fs = {
+
+        };
+
+        let resultFs = {
+            outFields: '*',
+            tableName: 'table',
+            geometry: '{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}'            ,
+            geometryType: 'esriGeometryPolygon',
+            spatialRel: 'esriSpatialRelIntersects',
+            inSR: '{\"wkid\":4326}'
+        };
+
+        let result = ConverterService.sql2FS(sql);
+        result.should.not.be.null();
+        result.should.have.property('fs');
+        result.fs.should.have.property('outFields',resultFs.outFields);
+        result.fs.should.have.property('tableName',resultFs.tableName);
+        result.fs.should.not.have.property('where');
+        result.fs.should.have.property('geometry',resultFs.geometry);
+        result.fs.should.have.property('geometryType',resultFs.geometryType);
+        result.fs.should.have.property('spatialRel',resultFs.spatialRel);
+        result.fs.should.have.property('inSR',resultFs.inSR);
     });
 
     after(function*() {
