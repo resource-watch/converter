@@ -5,7 +5,7 @@ var SQLService = require('services/sqlService');
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
 const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
-const OBTAIN_GEOJSON = /[.]*st_geomfromgeojson\(['|"]([^\)]*)['|"]\)/g;
+const OBTAIN_GEOJSON = /[.]*st_asgeojson *\( *['|"]([^\)]*)['|"] *\)/g;
 const CONTAIN_INTERSEC = /[.]*([and | or]*st_intersects.*)\)/g;
 const obtainColAggrRegex = /\((.*?)\)/g;
 
