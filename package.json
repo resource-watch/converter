@@ -37,7 +37,7 @@
     "koa-router": "5.4.0",
     "newrelic": "1.27.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
-    "vizz.microservice-client": "^1.2.5"
+    "vizz.microservice-client": "1.4.0"
   },
   "devDependencies": {
     "co-mocha": "1.1.2",
