@@ -87,10 +87,10 @@ class ConverterService {
     }
 
     static convertGeoJSONToEsriGJSON(geojson) {
-        if(geojson.type === 'Polygon'){
+        if(geojson.type === 'polygon'){
             geojson.rings = geojson.coordinates;
             delete geojson.coordinates;
-        } else if(geojson.type === 'MultiPolygon') {
+        } else if(geojson.type === 'multipolygon') {
             geojson.rings = geojson.coordinates[0];
             delete geojson.coordinates;
         }
@@ -122,7 +122,7 @@ class ConverterService {
                 result.inSR = JSON.stringify({
                     wkid: 4326
                 });
-                console.log(geojson[0]);
+
                 result.geometry = JSON.stringify(ConverterService.convertGeoJSONToEsriGJSON(JSON.parse(geojson[1])));
             }
         }
