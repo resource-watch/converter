@@ -2,6 +2,14 @@
 
 var simpleSqlParser = require('simple-sql-parser');
 var logger = require('logger');
+var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+
+var deserializer = function(obj) {
+    return function(callback) {
+        new JSONAPIDeserializer({keyForAttribute: 'camelCase'}).deserialize(obj, callback);
+    };
+};
+
 
 class SQLService {
     static generateError( message){
@@ -43,6 +51,39 @@ class SQLService {
             error: false,
             ast: ast.value
         };
+    }
+
+    static * obtainGeoStore(id) {
+        let result = yield require('vizz.microservice-client').requestToMicroservice({
+            uri: encodeURI(`/geostore/${id}`),
+            method: 'GET',
+            json: true
+        });
+        if (result.statusCode !== 200) {
+            logger.error('Error obtaining geostore', result.body);
+            throw new Error('Geostore error');
+        }
+        let geostore = yield deserializer(result.body);
+        if (geostore) {
+            return geostore;
+        }
+    }
+
+    static * sql2SQL(data) {
+        logger.debug('Converting sql to sql', data);
+        if (data.geostore) {
+            logger.debug('Contain geostore. Obtaining geojson');
+            let geostore = yield SQLService.obtainGeoStore(data.geostore);
+            logger.debug('Completing query');
+            if (data.sql.toLowerCase().indexOf('where') >= 0){
+              data.sql += ` AND `;
+            } else {
+              data.sql += ' WHERE ';
+            }
+            data.sql += `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0])}'), 4326), the_geom)`;
+        }
+        logger.debug('sql converted!');
+        return data.sql;
     }
 }
 
