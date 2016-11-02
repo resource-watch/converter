@@ -6,7 +6,7 @@
         "dirLogFile": null
     },
     "service": {
-        "id": "converter-api_1.0.0",
+        "id": "converter-api_1.1.0",
         "name": "Converter API",
         "port": 4100
     }

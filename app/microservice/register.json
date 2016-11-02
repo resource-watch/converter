@@ -23,5 +23,19 @@
             "method": "GET",
             "path": "/api/v1/convert/checkSQL"
         }]
+    }, {
+        "url": "/convert/sql2SQL",
+        "method": "GET",
+        "endpoints": [{
+            "method": "GET",
+            "path": "/api/v1/convert/sql2SQL"
+        }]
+    }, {
+        "url": "/convert/sql2SQL",
+        "method": "POST",
+        "endpoints": [{
+            "method": "POST",
+            "path": "/api/v1/convert/sql2SQL"
+        }]
     }]
 }
