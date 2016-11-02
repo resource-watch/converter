@@ -6,73 +6,95 @@ var ConverterService = require('services/converterService');
 var SQLService = require('services/sqlService');
 var ResultSerializer = require('serializers/resultSerializer');
 var router = new Router({
-    prefix: '/api/v1/convert'
+  prefix: '/api/v1/convert'
 });
 
 
 class ConvertRouter {
 
-    static convertFSObjectToQuery(fs){
-        logger.debug('Converting fs to queryparams');
-        let query = '';
-        if(fs){
-            let keys = Object.keys(fs);
+  static convertFSObjectToQuery(fs) {
+    logger.debug('Converting fs to queryparams');
+    let query = '';
+    if (fs) {
+      let keys = Object.keys(fs);
 
-            for(let i = 0, length = keys.length; i < length; i++){
-                if(i === 0){
-                    query +=`?${keys[i]}=${fs[keys[i]]}`;
-                }else {
-                    query +=`&${keys[i]}=${fs[keys[i]]}`;
-                }
-            }
+      for (let i = 0, length = keys.length; i < length; i++) {
+        if (i === 0) {
+          query += `?${keys[i]}=${fs[keys[i]]}`;
+        } else {
+          query += `&${keys[i]}=${fs[keys[i]]}`;
         }
-        return query;
+      }
     }
+    return query;
+  }
 
 
-    static * fs2SQL() {
-        logger.info('FS2SQL with queryparams ', this.query);
-        let result = ConverterService.fs2SQL(this.query, this.query.tableName);
-        if (result && result.error) {
-            this.throw(400, result.message);
-            return;
-        }
-        this.body = ResultSerializer.serialize({
-            query: result.sql
-        });
+  static * fs2SQL() {
+    logger.info('FS2SQL with queryparams ', this.query);
+    let result = ConverterService.fs2SQL(this.query, this.query.tableName);
+    if (result && result.error) {
+      this.throw(400, result.message);
+      return;
     }
+    this.body = ResultSerializer.serialize({
+      query: result.sql
+    });
+  }
 
-    static * sql2FS() {
-        logger.info('SQL2FS with sql ', this.query.sql);
-        this.assert(this.query.sql, 400, 'Sql param required');
-        let result = ConverterService.sql2FS(this.query.sql.trim());
-        if (result && result.error) {
-            this.throw(400, result.message);
-            return;
-        }
-        this.body = ResultSerializer.serialize({
-            query: ConvertRouter.convertFSObjectToQuery(result.fs)
-        });
+  static * sql2FS() {
+    logger.info('SQL2FS with sql ', this.query.sql);
+    this.assert(this.query.sql, 400, 'Sql param required');
+    let result = ConverterService.sql2FS(this.query.sql.trim());
+    if (result && result.error) {
+      this.throw(400, result.message);
+      return;
     }
+    this.body = ResultSerializer.serialize({
+      query: ConvertRouter.convertFSObjectToQuery(result.fs)
+    });
+  }
 
-    static * checkSQL() {
-        logger.info('CheckSQL with sql ', this.query.sql);
-        this.assert(this.query.sql, 400, 'Sql param required');
-        let result = SQLService.checkSQL(this.query.sql.trim());
-        if (result && result.error) {
-            this.throw(400, result.message);
-            return;
-        }
-        this.body = ResultSerializer.serialize({
-            query: this.query.sql
-        });
+  static * checkSQL() {
+    logger.info('CheckSQL with sql ', this.query.sql);
+    this.assert(this.query.sql, 400, 'Sql param required');
+    let result = SQLService.checkSQL(this.query.sql.trim());
+    if (result && result.error) {
+      this.throw(400, result.message);
+      return;
     }
+    this.body = ResultSerializer.serialize({
+      query: this.query.sql
+    });
+  }
+
+  static * sql2SQL() {
+    logger.info('Converting sql to sql');
+    let sql = this.query.sql;
+    logger.debug('body', this.request.body);
+    if (this.request.body && this.request.body.sql) {
+      sql = this.request.body.sql;
+    }
+    this.assert(sql, 400, 'SQL body is required');
+    let params = Object.assign({}, this.request.body, this.query);
+    sql = yield SQLService.sql2SQL(params);
+    let result = SQLService.checkSQL(sql);
+    if (result && result.error) {
+      this.throw(400, result.message);
+      return;
+    }
+    this.body = ResultSerializer.serialize({
+      query: sql
+    });
+  }
 
 }
 
 router.get('/fs2SQL', ConvertRouter.fs2SQL);
 router.get('/sql2FS', ConvertRouter.sql2FS);
 router.get('/checkSQL', ConvertRouter.checkSQL);
+router.get('/sql2SQL', ConvertRouter.sql2SQL);
+router.post('/sql2SQL', ConvertRouter.sql2SQL);
 
 
 module.exports = router;
