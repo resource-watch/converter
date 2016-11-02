@@ -7,6 +7,7 @@ if(process.env.NODE_ENV === 'prod'){
 var logger = require('logger');
 var path = require('path');
 var koa = require('koa');
+var bodyParser = require('koa-bodyparser');
 var config = require('config');
 var koaLogger = require('koa-logger');
 var ErrorSerializer = require('serializers/errorSerializer');
@@ -18,6 +19,11 @@ var app = koa();
 if (process.env.NODE_ENV === 'dev') {
     app.use(koaLogger());
 }
+
+app.use(bodyParser({
+    jsonLimit: '50mb'
+}));
+
 //catch errors and send in jsonapi standard. Always return vnd.api+json
 app.use(function*(next) {
     try {
