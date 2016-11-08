@@ -75,12 +75,20 @@ class SQLService {
             logger.debug('Contain geostore. Obtaining geojson');
             let geostore = yield SQLService.obtainGeoStore(data.geostore);
             logger.debug('Completing query');
-            if (data.sql.toLowerCase().indexOf('where') >= 0){
-              data.sql += ` AND `;
-            } else {
-              data.sql += ' WHERE ';
+            let ast = simpleSqlParser.sql2ast(data.sql);
+            if (!ast.status){
+              return SQLService.generateError('Malformed query');
             }
-            data.sql += `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0])}'), 4326), the_geom)`;
+            const intersection = `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0])}'), 4326), the_geom)`;
+            logger.debug('ast', ast);
+            if(ast.value.where){
+              ast.value.where.expression += ' AND ' + intersection;
+            } else {
+              ast.value.where = {expression: intersection };
+            }
+            var query = simpleSqlParser.ast2sql(ast);
+            data.sql = query;
+           
         }
         logger.debug('sql converted!');
         return data.sql;
