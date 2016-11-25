@@ -2,6 +2,8 @@
 
 var logger = require('logger');
 var SQLService = require('services/sqlService');
+var geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
+var arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
 const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
@@ -9,26 +11,36 @@ const OBTAIN_GEOJSON = /[.]*st_geomfromgeojson*\( *['|"]([^\)]*)['|"] *\)/g;
 const CONTAIN_INTERSEC = /[.]*([and | or]*st_intersects.*)\)/g;
 const obtainColAggrRegex = /\((.*?)\)/g;
 
+var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+
+var deserializer = function(obj) {
+  return function(callback) {
+    new JSONAPIDeserializer({
+      keyForAttribute: 'camelCase'
+    }).deserialize(obj, callback);
+  };
+};
+
 class ConverterService {
 
-    static obtainSelect(fs){
-        let result = '';
-        if(!fs.outFields && !fs.outStatistics){
-            return '*';
-        }
-        if(fs.outFields){
-            result = fs.outFields;
-        }
-        if(fs.outStatistics){
-            try{
+  static obtainSelect(fs) {
+      let result = '';
+      if (!fs.outFields && !fs.outStatistics) {
+        return '*';
+      }
+      if (fs.outFields) {
+        result = fs.outFields;
+      }
+      if (fs.outStatistics) {
+        try {
 
-                let statistics = JSON.parse(fs.outStatistics);
-                if(statistics){
-                    for(let i=0, length = statistics.length; i < length; i++){
-                        if(result){
-                            result += ', ';
-                        }
-                        result += `${statistics[i].statisticType}(${statistics[i].onStatisticField}) ${statistics[i].outStatisticFieldName ? ` AS ${statistics[i].outStatisticFieldName} `: ''}`;
+          let statistics = JSON.parse(fs.outStatistics);
+          if (statistics) {
+            for (let i = 0, length = statistics.length; i < length; i++) {
+              if (result) {
+                result += ', ';
+              }
+              result += `${statistics[i].statisticType}(${statistics[i].onStatisticField}) ${statistics[i].outStatisticFieldName ? ` AS ${statistics[i].outStatisticFieldName} `: ''}`;
                     }
                 }
             } catch(err){
@@ -39,8 +51,8 @@ class ConverterService {
         return result;
     }
 
-    static obtainWhere(fs) {
-        logger.debug(fs);
+    static * obtainWhere(params) {
+        let fs = params;
         let where = '';
         if (fs.where) {
             if (!where){
@@ -54,18 +66,33 @@ class ConverterService {
             } else {
                 where += ' AND ';
             }
-            where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${fs.geometry}'), 4326))`;
+            
+            let esrigeojson = JSON.parse(fs.geometry);
+            
+            let geojson = arcgisToGeoJSON(esrigeojson);
+            where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.geometry)}'), 4326))`;
+        } else if(params.geostore){
+          let geojson = yield ConverterService.obtainGeoStore(params.geostore);
+          if (!where){
+                where = 'WHERE ';
+            } else {
+                where += ' AND ';
+            }
+            where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.features[0].geometry)}'), 4326))`;
         }
         return where;
     }
 
-    static fs2SQL(fs, tableName){
-        logger.info('Creating query from featureService');
-        let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${tableName}
-                ${ConverterService.obtainWhere(fs)}
+    static * fs2SQL(params){
+        let fs = params;
+        logger.info('Creating query from featureService', params);
+        let where = yield ConverterService.obtainWhere(params);
+        let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
+                ${where}
                 ${fs.groupByFieldsForStatistics ? `GROUP BY ${fs.groupByFieldsForStatistics} `:'' }
                 ${fs.orderByFields ? `ORDER BY ${fs.orderByFields} `: ''}
                 ${fs.resultRecordCount ? `LIMIT ${fs.resultRecordCount }`: ''}`.replace(/\s\s+/g, ' ').trim();
+      
         let result = SQLService.checkSQL(sql);
         if(result && result.error){
             return result;
@@ -206,18 +233,48 @@ class ConverterService {
             fs.resultRecordCount = ast.limit.nb;
             fs.supportsPagination = true;
         }
+        if(ast.geostore){
+          fs.geometryType = 'esriGeometryPolygon';
+          fs.geometry = JSON.stringify(geojsonToArcGIS(ast.geostore.features[0].geometry));
+        }
         return fs;
     }
 
-    static sql2FS(sql){
-        logger.info('Creating featureservice from sql %s', sql);
-        let result = SQLService.checkSQL(sql);
+    static * obtainGeoStore(id) {
+      logger.info('Obtaining geostore with id', id);
+      try {
+        let result = yield require('ct-register-microservice-node').requestToMicroservice({
+          uri: encodeURI(`/geostore/${id}`),
+          method: 'GET',
+          json: true
+        });
+        
+        let geostore = yield deserializer(result);
+        if (geostore) {
+          return geostore.geojson;
+        }
+      } catch(err){
+        if (err && err.statusCode === 404) {
+          throw new Error('Geostore not found');
+        } 
+        throw new Error('Error obtaining geostore');
+      }
+    }
+
+    static * sql2FS(params){
+        let sql = params.sql.trim();
+        logger.info('Creating featureservice from sql', sql);
+        let result = SQLService.checkSQL(params.sql);
         if(result && result.error){
             return result;
         }
         result = SQLService.obtainASTFromSQL(sql);
         if(result && result.error){
             return result;
+        }
+        if (params.geostore) {
+          let geostore = yield ConverterService.obtainGeoStore(params.geostore);
+          result.ast.geostore = geostore;
         }
         result = ConverterService.obtainFSFromAST(result.ast);
         if(result && result.error){

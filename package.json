@@ -1,6 +1,6 @@
 {
   "name": "converter",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Converter API",
   "main": "index.js",
   "scripts": {
@@ -38,7 +38,8 @@
     "koa-router": "5.4.0",
     "newrelic": "1.27.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
-    "vizz.microservice-client": "1.4.0"
+    "ct-register-microservice-node": "^1.0.5",
+    "arcgis-to-geojson-utils": "1.0.1"
   },
   "devDependencies": {
     "co-mocha": "1.1.2",

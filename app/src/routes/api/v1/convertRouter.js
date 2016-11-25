@@ -30,9 +30,11 @@ class ConvertRouter {
   }
 
 
-  static * fs2SQL() {
-    logger.info('FS2SQL with queryparams ', this.query);
-    let result = ConverterService.fs2SQL(this.query, this.query.tableName);
+  static * fs2SQL() {    
+    logger.info('FS2SQL with sql ');
+    let params = Object.assign({}, this.request.body, this.query);
+    this.assert(params.tableName, 400, 'TableName is required');
+    let result = yield ConverterService.fs2SQL(params);
     if (result && result.error) {
       this.throw(400, result.message);
       return;
@@ -43,9 +45,11 @@ class ConvertRouter {
   }
 
   static * sql2FS() {
-    logger.info('SQL2FS with sql ', this.query.sql);
-    this.assert(this.query.sql, 400, 'Sql param required');
-    let result = ConverterService.sql2FS(this.query.sql.trim());
+    logger.info('SQL2FS with sql ');
+    let params = Object.assign({}, this.request.body, this.query);
+    this.assert(params.sql, 400, 'SQL param is required');
+    
+    let result = yield ConverterService.sql2FS(params);
     if (result && result.error) {
       this.throw(400, result.message);
       return;
@@ -69,15 +73,11 @@ class ConvertRouter {
   }
 
   static * sql2SQL() {
-    logger.info('Converting sql to sql');
-    let sql = this.query.sql;
-    logger.debug('body', this.request.body);
-    if (this.request.body && this.request.body.sql) {
-      sql = this.request.body.sql;
-    }
-    this.assert(sql, 400, 'SQL body is required');
+    logger.info('Converting sql to sql');    
+    
     let params = Object.assign({}, this.request.body, this.query);
-    sql = yield SQLService.sql2SQL(params);
+    this.assert(params.sql, 400, 'SQL param is required');
+    let sql = yield SQLService.sql2SQL(params);
     let result = SQLService.checkSQL(sql);
     if (result && result.error) {
       this.throw(400, result.message);
@@ -91,7 +91,9 @@ class ConvertRouter {
 }
 
 router.get('/fs2SQL', ConvertRouter.fs2SQL);
+router.post('/fs2SQL', ConvertRouter.fs2SQL);
 router.get('/sql2FS', ConvertRouter.sql2FS);
+router.post('/sql2FS', ConvertRouter.sql2FS);
 router.get('/checkSQL', ConvertRouter.checkSQL);
 router.get('/sql2SQL', ConvertRouter.sql2SQL);
 router.post('/sql2SQL', ConvertRouter.sql2SQL);

@@ -1,0 +1,363 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Converter API",
+        "description": "Converter API",
+        "version": "1.0.0"
+    },
+    "schemes": [
+        "https",
+        "http"
+    ],
+    "produces": [
+        "application/vnd.api+json"
+    ],
+    "paths": {
+        "/convert/checkSQL": {
+            "get": {
+                "summary": "Check if sql is correct",
+                "operationId": "checkSQL",
+                "produces": [
+                    "application/vnd.api+json"
+                ],
+                "tags": [
+                    "CONVERT"
+                ],
+                "parameters": [
+                    {
+                        "name": "sql",
+                        "in": "query",
+                        "description": "SQL to check",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SQL Correct"
+                    },
+                    "400": {
+                        "description": "Error in sql",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/convert/fs2SQL": {
+            "get": {
+                "summary": "Feature service to SQL",
+                "description": "Return generated sql from feature service params. Documentation of feature service (http://resources.arcgis.com/en/help/arcgis-rest-api/#/Query_Feature_Service_Layer/02r3000000r1000000/)",
+                "operationId": "fs2SQL",
+                "produces": [
+                    "application/vnd.api+json"
+                ],
+                "tags": [
+                    "CONVERT"
+                ],
+                "parameters": [
+                    {
+                        "name": "tableName",
+                        "in": "query",
+                        "description": "Name of the table",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "outFields",
+                        "in": "query",
+                        "description": "Select param of the feature service (example 'COL1,COL2 AS COL')",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "where",
+                        "in": "query",
+                        "description": "Where param of the feature service (example 'COL1 = \\'juan\\' and COL2=2')",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "outStatistics",
+                        "in": "query",
+                        "description": "outStatistics param of the feature service (example '[{\"statisticType\":\"count\",\"onStatisticField\":\"FIELD\",\"outStatisticFieldName\":\"OUTFIELD\"}]')",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "groupByFieldsForStatistics",
+                        "in": "query",
+                        "description": "groupByFieldsForStatistics param of the feature service (example 'COL2')",
+                        "required": false,
+                        "type": "string"
+                    },
+                    {
+                        "name": "resultRecordCount",
+                        "in": "query",
+                        "description": "resultRecordCount param of the feature service (example 10)",
+                        "required": false,
+                        "type": "number"
+                    },
+                    {
+                        "name": "orderByFields",
+                        "in": "query",
+                        "description": "orderByFields param of the feature service (example 'COL1 ASC,COL2 DESC')",
+                        "required": false,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SQL obtained",
+                        "schema": {
+                            "$ref": "#/definitions/SQLAPI"
+                        }
+                    },
+                    "400": {
+                        "description": "Error in transform",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        },
+        "/convert/sql2FS": {
+            "get": {
+                "summary": "SQL to Feature service",
+                "description": "Return generated feature service object from sql param. Only support SELECT, WHERE, ORDER BY, GROUP BY, LIMIT, AS, aggregate functions (count, sum, min, max, avg, stddev, var)",
+                "operationId": "sql2FS",
+                "produces": [
+                    "application/vnd.api+json"
+                ],
+                "tags": [
+                    "CONVERT"
+                ],
+                "parameters": [
+                    {
+                        "name": "sql",
+                        "in": "query",
+                        "description": "SQL to convert",
+                        "required": true,
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "FS obtained",
+                        "schema": {
+                            "$ref": "#/definitions/FSAPI"
+                        }
+                    },
+                    "400": {
+                        "description": "Error in transform",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "500": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    },
+                    "default": {
+                        "description": "unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Errors"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "Errors": {
+            "type": "object",
+            "description": "Errors",
+            "properties": {
+                "errors": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/Error"
+                    }
+                }
+            }
+        },
+        "Error": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "A unique identifier for this particular occurrence of the problem."
+                },
+                "links": {
+                    "type": "object",
+                    "description": "A links object",
+                    "properties": {
+                        "about": {
+                            "type": "string",
+                            "description": "A link that leads to further details about this particular occurrence of the problem."
+                        }
+                    }
+                },
+                "status": {
+                    "type": "string",
+                    "description": "The HTTP status code applicable to this problem, expressed as a string value"
+                },
+                "code": {
+                    "type": "string",
+                    "description": "An application-specific error code, expressed as a string value"
+                },
+                "title": {
+                    "type": "string",
+                    "description": "A short, human-readable summary of the problem that SHOULD NOT change from occurrence to occurrence of the problem, except for purposes of localization."
+                },
+                "detail": {
+                    "type": "string",
+                    "description": "A human-readable explanation specific to this occurrence of the problem. Like title, this field's value can be localized"
+                },
+                "source": {
+                    "type": "object",
+                    "description": "An object containing references to the source of the error, optionally including any of the following members",
+                    "properties": {
+                        "pointer": {
+                            "type": "string",
+                            "description": "A JSON Pointer [RFC6901] to the associated entity in the request document"
+                        },
+                        "parameter": {
+                            "type": "string",
+                            "description": "A string indicating which URI query parameter caused the error."
+                        }
+                    }
+                },
+                "meta": {
+                    "type": "object",
+                    "description": "A meta object containing non-standard meta-information about the error."
+                }
+            }
+        },
+        "FSAPI": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/FS"
+                    }
+                }
+            }
+        },
+        "FS": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Resource type"
+                },
+                "id": {
+                    "type": "string",
+                    "description": "Resource id"
+                },
+                "attributes": {
+                    "properties": {
+                        "schema": {
+                            "$ref": "#/definitions/FSBody"
+                        }
+                    }
+                }
+            }
+        },
+        "FSBody": {
+            "type": "object",
+            "properties": {
+                "tableName": {
+                    "type": "string",
+                    "description": "Name of the table"
+                },
+                "outFields": {
+                    "type": "string",
+                    "description": "Select columns"
+                },
+                "where": {
+                    "type": "string",
+                    "description": "Filters"
+                },
+                "outStatistics": {
+                    "type": "string",
+                    "description": "Aggregate columns"
+                },
+                "groupByFieldsForStatistics": {
+                    "type": "string",
+                    "description": "Group by"
+                },
+                "resultRecordCount": {
+                    "type": "number",
+                    "description": "Num elems"
+                },
+                "supportsPagination": {
+                    "type": "boolean",
+                    "description": "Param required to do limit"
+                },
+                "orderByFields": {
+                    "type": "string",
+                    "description": "Order by"
+                }
+            }
+        },
+        "SQLAPI": {
+            "type": "object",
+            "properties": {
+                "data": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/SQL"
+                    }
+                }
+            }
+        },
+        "SQL": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "description": "Resource type"
+                },
+                "id": {
+                    "type": "string",
+                    "description": "Resource id"
+                },
+                "attributes": {
+                    "properties": {
+                        "schema": {
+                            "$ref": "#/definitions/SQLBody"
+                        }
+                    }
+                }
+            }
+        },
+        "SQLBody": {
+            "type": "object",
+            "properties": {
+                "sql": {
+                    "type": "string",
+                    "description": "Result SQL"
+                }
+            }
+        }
+    }
+}

@@ -1,12 +1,13 @@
 prod:
-  image: vizzuality/converter:1.1.0${STAGING}
+  image: vizzuality/converter:1.2.0${STAGING}
   ports:
     - "4100"
   env_file:
     - prod.env
   command: start
   dns: ${DNS_SERVER}
-  # log_driver: "gelf"
   restart: always
-  # log_opt:
-  #   gelf-address: ${GELF_ADDRESS}
+  log_driver: "syslog"
+  log_opt:
+    syslog-address: ${SYSLOG_ADDRESS}
+    tag: converter${STAGING}
