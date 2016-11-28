@@ -68,6 +68,7 @@ class SQLService {
         return geostore;
       }
     } catch(err){
+      logger.error('Error obtaining geostore', err);
       if (err && err.statusCode === 404) {
         throw new Error('Geostore not found');
       } 
