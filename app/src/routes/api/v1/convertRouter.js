@@ -55,7 +55,8 @@ class ConvertRouter {
       return;
     }
     this.body = ResultSerializer.serialize({
-      query: ConvertRouter.convertFSObjectToQuery(result.fs)
+      query: ConvertRouter.convertFSObjectToQuery(result.fs),
+      fs: result.fs
     });
   }
 

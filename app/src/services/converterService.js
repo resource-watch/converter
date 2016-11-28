@@ -235,6 +235,10 @@ class ConverterService {
         }
         if(ast.geostore){
           fs.geometryType = 'esriGeometryPolygon';
+          fs.spatialRel = 'esriSpatialRelIntersects';              
+          fs.inSR = JSON.stringify({
+              wkid: 4326
+          });
           fs.geometry = JSON.stringify(geojsonToArcGIS(ast.geostore.features[0].geometry));
         }
         return fs;
