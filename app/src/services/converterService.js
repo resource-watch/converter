@@ -48,11 +48,17 @@ class ConverterService {
                 throw err;
             }
         }
+        if(fs.returnCountOnly){
+          if (result) {
+            result += ', ';
+          }
+          result += ' count(*) ';
+        }
         return result;
     }
 
     static * obtainWhere(params) {
-        let fs = params;
+        let fs = params.fs;
         let where = '';
         if (fs.where) {
             if (!where){
@@ -84,7 +90,7 @@ class ConverterService {
     }
 
     static * fs2SQL(params){
-        let fs = params;
+        let fs = params.fs;
         logger.info('Creating query from featureService', params);
         let where = yield ConverterService.obtainWhere(params);
         let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
@@ -171,21 +177,25 @@ class ConverterService {
                     //aggr function
                     let parts = obtainColAggrRegex.exec(ast.select[i].expression);
                     let obj = null;
-                    if(parts && parts.length > 1){
-                        obj = {
-                            onStatisticField: parts[1],
-                            statisticType: ConverterService.obtainAggrFun(ast.select[i].expression)
-                        };
-                        if(ast.select[i].alias){
-                            obj.outStatisticFieldName = ast.select[i].alias;
-                        }
-                        outStatistics.push(obj);
-                    } else {
-                        return {
-                            error: true,
-                            message: 'Query malformed. Function not found'
-                        };
-                    }
+                    if (ConverterService.obtainAggrFun(ast.select[i].expression).toLowerCase().trim() === 'count'){
+                      fs.returnCountOnly = true;
+                    } else { 
+                      if(parts && parts.length > 1){
+                          obj = {
+                              onStatisticField: parts[1],
+                              statisticType: ConverterService.obtainAggrFun(ast.select[i].expression)
+                          };
+                          if(ast.select[i].alias){
+                              obj.outStatisticFieldName = ast.select[i].alias;
+                          }
+                          outStatistics.push(obj);
+                      } else {
+                          return {
+                              error: true,
+                              message: 'Query malformed. Function not found'
+                          };
+                      }
+                  }
                 } else {
                     if(outFields !== ''){
                         outFields += ',';

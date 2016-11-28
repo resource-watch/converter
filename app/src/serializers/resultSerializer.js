@@ -7,7 +7,7 @@ var resultSerializer = new JSONAPISerializer('result', {
         return attribute;
     },
     fs: {
-      attributes: ['outStatistics', 'tableName', 'geometryType', 'geometry', 'outFields', 'groupByFieldsForStatistics', 'orderByFields', 'resultRecordCount', 'supportsPagination', 'spatialRel', 'inSR', 'where' ],
+      attributes: ['outStatistics', 'tableName', 'geometryType', 'geometry', 'outFields', 'groupByFieldsForStatistics', 'orderByFields', 'resultRecordCount', 'supportsPagination', 'spatialRel', 'inSR', 'where', 'returnCountOnly', 'outStatisticFieldName' ],
     },
     keyForAttribute: 'camelCase'
 });
