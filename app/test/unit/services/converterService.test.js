@@ -13,10 +13,11 @@ describe('SQLService', function() {
     it('Feature Service correct (only select)', function*() {
         let resultSQL = 'SELECT * FROM table';
         let fs = {
-            outFields: '*'
+            outFields: '*',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+        
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -24,10 +25,11 @@ describe('SQLService', function() {
     it('Feature Service correct (select with columns)', function*() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table';
         let fs = {
-            outFields: 'COL1, COL2 AS COL'
+            outFields: 'COL1, COL2 AS COL',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+      
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -36,10 +38,10 @@ describe('SQLService', function() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table WHERE COL1 = \'juan\' and COL2=2';
         let fs = {
             outFields: 'COL1, COL2 AS COL',
-            where: 'COL1 = \'juan\' and COL2=2'
+            where: 'COL1 = \'juan\' and COL2=2',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -52,10 +54,11 @@ describe('SQLService', function() {
             outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
             returnCountOnly: true,
-            groupByFieldsForStatistics: 'COL2'
+            groupByFieldsForStatistics: 'COL2',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -68,10 +71,10 @@ describe('SQLService', function() {
             where: 'COL1 = \'juan\' and COL2=2',
             returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
-            resultRecordCount: 10
+            resultRecordCount: 10,
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -84,21 +87,22 @@ describe('SQLService', function() {
             returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
             resultRecordCount: 10,
-            orderByFields: 'COL1 ASC,COL2 DESC'
+            orderByFields: 'COL1 ASC,COL2 DESC',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
     it('Feature Service correct (select with geometry intersec)', function*() {
         let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON(\'{"type":"Polygon","coordinates":[[[-46.3184,-4.5655],[-46.1426,-5.4848],[-46.7139,-5.7472],[-46.3184,-4.5655]]]}\'), 4326))';
         let fs = {
-            geometry: '{"geometry":{"rings":[[[-46.3184,-4.5655],[-46.1426,-5.4848],[-46.7139,-5.7472],[-46.3184,-4.5655]]],"spatialReference":{"wkid":4326}},"attributes":{}}'
+            geometry: '{"geometry":{"rings":[[[-46.3184,-4.5655],[-46.1426,-5.4848],[-46.7139,-5.7472],[-46.3184,-4.5655]]],"spatialReference":{"wkid":4326}},"attributes":{}}',
+            tableName: 'table'
         };
-        let tableName = 'table';
         
-        let result = yield ConverterService.fs2SQL({fs, tableName});
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 

@@ -34,6 +34,7 @@ class ConvertRouter {
     logger.info('FS2SQL with sql ');
     let params = Object.assign({}, this.request.body, this.query);
     this.assert(params.tableName, 400, 'TableName is required');
+    
     let result = yield ConverterService.fs2SQL(params);
     if (result && result.error) {
       this.throw(400, result.message);

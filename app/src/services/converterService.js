@@ -58,7 +58,7 @@ class ConverterService {
     }
 
     static * obtainWhere(params) {
-        let fs = params.fs;
+        let fs = params;
         let where = '';
         if (fs.where) {
             if (!where){
@@ -90,7 +90,7 @@ class ConverterService {
     }
 
     static * fs2SQL(params){
-        let fs = params.fs;
+        let fs = params;
         logger.info('Creating query from featureService', params);
         let where = yield ConverterService.obtainWhere(params);
         let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
