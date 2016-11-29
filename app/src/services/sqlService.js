@@ -86,7 +86,7 @@ class SQLService {
       if (!ast.status) {
         return SQLService.generateError('Malformed query');
       }
-      const intersection = `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0])}'), 4326), the_geom)`;
+      const intersection = `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0].geometry)}'), 4326), the_geom)`;
       logger.debug('ast', ast);
       if (ast.value.where) {
         ast.value.where.expression += ' AND ' + intersection;
