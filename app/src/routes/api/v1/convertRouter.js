@@ -49,7 +49,7 @@ class ConvertRouter {
     logger.info('SQL2FS with sql ');
     let params = Object.assign({}, this.request.body, this.query);
     this.assert(params.sql, 400, 'SQL param is required');
-    
+    params.sql = params.sql.replace(/  +/g, '').trim(); // hack: TODO: fix the parser to support several spaces
     let result = yield ConverterService.sql2FS(params);
     if (result && result.error) {
       this.throw(400, result.message);
@@ -62,9 +62,11 @@ class ConvertRouter {
   }
 
   static * checkSQL() {
-    logger.info('CheckSQL with sql ', this.query.sql);
-    this.assert(this.query.sql, 400, 'Sql param required');
-    let result = SQLService.checkSQL(this.query.sql.trim());
+    logger.info('CheckSQL with sql ');
+    let params = Object.assign({}, this.request.body, this.query);
+    this.assert(params.sql, 400, 'SQL param is required');
+    params.sql = params.sql.replace(/  +/g, '');
+    let result = SQLService.checkSQL(params.sql.trim());
     if (result && result.error) {
       this.throw(400, result.message);
       return;
@@ -79,6 +81,7 @@ class ConvertRouter {
     
     let params = Object.assign({}, this.request.body, this.query);
     this.assert(params.sql, 400, 'SQL param is required');
+    params.sql = params.sql.replace(/  +/g, '').trim(); // hack: TODO: fix the parser to support several spaces
     let sql = yield SQLService.sql2SQL(params);
     let result = SQLService.checkSQL(sql);
     if (result && result.error) {
