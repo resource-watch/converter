@@ -13,10 +13,11 @@ describe('SQLService', function() {
     it('Feature Service correct (only select)', function*() {
         let resultSQL = 'SELECT * FROM table';
         let fs = {
-            outFields: '*'
+            outFields: '*',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+        
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -24,10 +25,11 @@ describe('SQLService', function() {
     it('Feature Service correct (select with columns)', function*() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table';
         let fs = {
-            outFields: 'COL1, COL2 AS COL'
+            outFields: 'COL1, COL2 AS COL',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+      
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -36,81 +38,71 @@ describe('SQLService', function() {
         let resultSQL = 'SELECT COL1, COL2 AS COL FROM table WHERE COL1 = \'juan\' and COL2=2';
         let fs = {
             outFields: 'COL1, COL2 AS COL',
-            where: 'COL1 = \'juan\' and COL2=2'
+            where: 'COL1 = \'juan\' and COL2=2',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
 
     it('Feature Service correct (select with group by)', function*() {
-        let resultSQL = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
+        let resultSQL = 'SELECT COL1, COL2 AS COL, count(*) FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
 
-        let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        }];
+    
         let fs = {
             outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
-            outStatistics: JSON.stringify(outStatistics),
-            groupByFieldsForStatistics: 'COL2'
+            returnCountOnly: true,
+            groupByFieldsForStatistics: 'COL2',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
     it('Feature Service correct (select with limit)', function*() {
-        let resultSQL = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 LIMIT 10';
+        let resultSQL = 'SELECT COL1, COL2 AS COL, count(*) FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 LIMIT 10';
 
-        let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        }];
+  
         let fs = {
             outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
-            outStatistics: JSON.stringify(outStatistics),
+            returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
-            resultRecordCount: 10
+            resultRecordCount: 10,
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
     it('Feature Service correct (select with order)', function*() {
-        let resultSQL = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 ORDER BY COL1 ASC,COL2 DESC LIMIT 10';
+        let resultSQL = 'SELECT COL1, COL2 AS COL, count(*) FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 ORDER BY COL1 ASC,COL2 DESC LIMIT 10';
 
-        let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        }];
         let fs = {
             outFields: 'COL1, COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
-            outStatistics: JSON.stringify(outStatistics),
+            returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
             resultRecordCount: 10,
-            orderByFields: 'COL1 ASC,COL2 DESC'
+            orderByFields: 'COL1 ASC,COL2 DESC',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
     it('Feature Service correct (select with geometry intersec)', function*() {
-        let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON(\'{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}\'), 4326))';
+        let resultSQL = 'SELECT * FROM table WHERE ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON(\'{"type":"Polygon","coordinates":[[[-46.3184,-4.5655],[-46.1426,-5.4848],[-46.7139,-5.7472],[-46.3184,-4.5655]]]}\'), 4326))';
         let fs = {
-            geometry: '{\"type\":\"polygon\",\"features\":[{\"type\":\"feature\",\"properties\":{},\"geometry\":{\"type\":\"polygon\",\"coordinates\":[[[88.9453125,57.89149735271031],[88.9453125,58.63121664342478],[91.40625,58.63121664342478],[91.40625,57.89149735271031],[88.9453125,57.89149735271031]]]}}]}'
+            geometry: '{"geometry":{"rings":[[[-46.3184,-4.5655],[-46.1426,-5.4848],[-46.7139,-5.7472],[-46.3184,-4.5655]]],"spatialReference":{"wkid":4326}},"attributes":{}}',
+            tableName: 'table'
         };
-        let tableName = 'table';
-        let result = ConverterService.fs2SQL(fs, tableName);
+        
+        let result = yield ConverterService.fs2SQL(fs);
         result.sql.should.be.equal(resultSQL);
     });
 
@@ -123,7 +115,7 @@ describe('SQLService', function() {
             tableName: 'table'
         };
         let tableName = 'table';
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
@@ -137,7 +129,7 @@ describe('SQLService', function() {
             outFields: 'COL1,COL2 AS COL',
             tableName: 'table'
         };
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
@@ -151,7 +143,7 @@ describe('SQLService', function() {
             where: 'COL1 = \'juan\' and COL2=2',
             tableName: 'table'
         };
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
@@ -163,10 +155,6 @@ describe('SQLService', function() {
         let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD, avg(COL2) as another FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2';
 
         let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        },{
             'statisticType': 'avg',
             'onStatisticField': 'COL2',
             'outStatisticFieldName': 'another'
@@ -176,9 +164,10 @@ describe('SQLService', function() {
             where: 'COL1 = \'juan\' and COL2=2',
             outStatistics: outStatistics,
             groupByFieldsForStatistics: 'COL2',
+            returnCountOnly: true,
             tableName: 'table'
         };
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
@@ -187,7 +176,7 @@ describe('SQLService', function() {
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
         result.fs.should.have.property('outStatistics');
         let outStatisticsResult = JSON.parse(result.fs.outStatistics);
-        outStatistics.should.length(2);
+        outStatistics.should.length(1);
         outStatisticsResult[0].should.have.property('statisticType',resultFs.outStatistics[0].statisticType);
         outStatisticsResult[0].should.have.property('outStatisticFieldName',resultFs.outStatistics[0].outStatisticFieldName);
         outStatisticsResult[0].should.have.property('onStatisticField',resultFs.outStatistics[0].onStatisticField);
@@ -196,69 +185,52 @@ describe('SQLService', function() {
     it('SQL to Feature Servicee correct (select with limit)', function*() {
         let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 LIMIT 10';
 
-        let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        }];
+        
         let resultFs = {
             outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
-            outStatistics: outStatistics,
+            returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
             resultRecordCount: 10,
             supportsPagination: true,
             tableName: 'table'
         };
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
-        result.fs.should.have.property('outStatistics');
-        let outStatisticsResult = JSON.parse(result.fs.outStatistics);
-        outStatistics.should.length(1);
-        outStatisticsResult[0].should.have.property('statisticType',resultFs.outStatistics[0].statisticType);
-        outStatisticsResult[0].should.have.property('outStatisticFieldName',resultFs.outStatistics[0].outStatisticFieldName);
-        outStatisticsResult[0].should.have.property('onStatisticField',resultFs.outStatistics[0].onStatisticField);
+        
+       
         result.fs.should.have.property('resultRecordCount',resultFs.resultRecordCount);
         result.fs.should.have.property('supportsPagination',resultFs.supportsPagination);
     });
 
 
     it('SQL to Feature Servicee correct (select with order)', function*() {
-        let sql = 'SELECT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 ORDER BY COL1 ASC,COL2 DESC LIMIT 10';
+        let sql = 'SELECT COL1, COL2 AS COL, count(*) FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 ORDER BY COL1 ASC,COL2 DESC LIMIT 10';
 
-        let outStatistics = [{
-            'statisticType': 'count',
-            'onStatisticField': 'FIELD',
-            'outStatisticFieldName': 'OUTFIELD'
-        }];
+       
         let resultFs = {
             outFields: 'COL1,COL2 AS COL',
             where: 'COL1 = \'juan\' and COL2=2',
-            outStatistics: outStatistics,
+            returnCountOnly: true,
             groupByFieldsForStatistics: 'COL2',
             resultRecordCount: 10,
             supportsPagination: true,
             orderByFields: 'COL1 ASC,COL2 DESC',
             tableName: 'table'
         };
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);
         result.fs.should.have.property('tableName',resultFs.tableName);
         result.fs.should.have.property('where',resultFs.where);
         result.fs.should.have.property('groupByFieldsForStatistics',resultFs.groupByFieldsForStatistics);
-        result.fs.should.have.property('outStatistics');
-        let outStatisticsResult = JSON.parse(result.fs.outStatistics);
-        outStatistics.should.length(1);
-        outStatisticsResult[0].should.have.property('statisticType',resultFs.outStatistics[0].statisticType);
-        outStatisticsResult[0].should.have.property('outStatisticFieldName',resultFs.outStatistics[0].outStatisticFieldName);
-        outStatisticsResult[0].should.have.property('onStatisticField',resultFs.outStatistics[0].onStatisticField);
+        
         result.fs.should.have.property('resultRecordCount',resultFs.resultRecordCount);
         result.fs.should.have.property('supportsPagination',resultFs.supportsPagination);
         result.fs.should.have.property('orderByFields',resultFs.orderByFields);
@@ -268,7 +240,7 @@ describe('SQLService', function() {
         let sql = 'INSERT COL1, COL2 AS COL, count(FIELD) AS OUTFIELD FROM table WHERE COL1 = \'juan\' and COL2=2 GROUP BY COL2 ORDER BY COL1 ASC,COL2 DESC LIMIT 10';
 
 
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('error', true);
         result.should.have.property('message');
@@ -290,7 +262,7 @@ describe('SQLService', function() {
             inSR: '{\"wkid\":4326}'
         };
 
-        let result = ConverterService.sql2FS(sql);
+        let result = yield ConverterService.sql2FS({sql:sql});
         result.should.not.be.null();
         result.should.have.property('fs');
         result.fs.should.have.property('outFields',resultFs.outFields);

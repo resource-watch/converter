@@ -5,8 +5,9 @@ develop:
   container_name: converter-develop
   environment:
     NODE_ENV: dev
+    CT_URL: http://mymachine:9000
+    LOCAL_URL: http://mymachine:4100
     PORT: 4100
-    API_GATEWAY_URL: http://192.168.99.100:8000
   command: develop
   volumes:
     - ./app:/opt/converter/app
