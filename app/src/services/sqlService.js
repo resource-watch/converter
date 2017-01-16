@@ -23,7 +23,7 @@ class SQLService {
   }
 
   static correctSQL(ast) {
-    if (ast.type !== 'select') {
+    if (ast.type !== 'select' && ast.type !== 'delete') {
       return SQLService.generateError(`Type ${ast.type} not allowed`);
     }
     if ((ast.join && ast.join.length > 0) || (ast.from && ast.from.length > 1)) {

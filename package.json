@@ -38,7 +38,7 @@
     "koa-router": "5.4.0",
     "newrelic": "1.27.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
-    "ct-register-microservice-node": "^1.0.5",
+    "ct-register-microservice-node": "^1.1.1",
     "arcgis-to-geojson-utils": "1.0.1"
   },
   "devDependencies": {
