@@ -2,12 +2,15 @@
 
 var JSONAPISerializer = require('jsonapi-serializer').Serializer;
 var resultSerializer = new JSONAPISerializer('result', {
-    attributes: ['query', 'fs'],
+    attributes: ['query', 'fs', 'jsonSql'],
     typeForAttribute: function(attribute, record) {
         return attribute;
     },
     fs: {
       attributes: ['outStatistics', 'tableName', 'geometryType', 'geometry', 'outFields', 'groupByFieldsForStatistics', 'orderByFields', 'resultRecordCount', 'supportsPagination', 'spatialRel', 'inSR', 'where', 'returnCountOnly', 'outStatisticFieldName' ],
+    },
+    jsonSql: {
+      attributes: ['select', 'from', 'where', 'group', 'orderBy', 'limit', 'offset']
     },
     keyForAttribute: 'camelCase'
 });

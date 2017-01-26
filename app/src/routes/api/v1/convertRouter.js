@@ -5,6 +5,8 @@ var logger = require('logger');
 var ConverterService = require('services/converterService');
 var SQLService = require('services/sqlService');
 var ResultSerializer = require('serializers/resultSerializer');
+const Sql2json = require('sql2json').sql2json;
+const Json2sql = require('sql2json').json2sql;
 var router = new Router({
   prefix: '/api/v1/convert'
 });
@@ -46,7 +48,8 @@ class ConvertRouter {
       return;
     }
     this.body = ResultSerializer.serialize({
-      query: result.sql
+      query: result.query,
+      jsonSql: result.parsed
     });
   }
 
@@ -62,7 +65,8 @@ class ConvertRouter {
     }
     this.body = ResultSerializer.serialize({
       query: ConvertRouter.convertFSObjectToQuery(result.fs),
-      fs: result.fs
+      fs: result.fs,
+      jsonSql: result.parsed
     });
   }
 
@@ -70,14 +74,19 @@ class ConvertRouter {
     logger.info('CheckSQL with sql ');
     let params = Object.assign({}, this.request.body, this.query);
     this.assert(params.sql, 400, 'SQL param is required');
-    params.sql = hack(params.sql); // hack: TODO: fix the parser to support several spaces
-    let result = SQLService.checkSQL(params.sql.trim());
+    let parsed = new Sql2json(params.sql).toJSON();
+    if (!parsed) {
+      return SQLService.generateError('Malformed query');
+    }
+    
+    let result = SQLService.checkSQL(parsed);
     if (result && result.error) {
       this.throw(400, result.message);
       return;
     }
     this.body = ResultSerializer.serialize({
-      query: this.query.sql
+      query: Json2sql.toSQL(parsed),
+      jsonSql: parsed
     });
   }
 
@@ -88,15 +97,17 @@ class ConvertRouter {
     
     let params = Object.assign({}, this.request.body, this.query);
     this.assert(params.sql, 400, 'SQL param is required');
-    params.sql = hack(params.sql); // hack: TODO: fix the parser to support several spaces
-    let sql = yield SQLService.sql2SQL(params);
-    let result = SQLService.checkSQL(sql);
+    
+    
+    let result = yield SQLService.sql2SQL(params);    
+    
     if (result && result.error) {
       this.throw(400, result.message);
       return;
     }
     this.body = ResultSerializer.serialize({
-      query: sql
+      query: result.sql,
+      jsonSql: result.parsed
     });
   }
 
