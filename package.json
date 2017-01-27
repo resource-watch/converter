@@ -3,7 +3,7 @@
   "version": "1.3.0",
   "description": "Converter API",
   "main": "index.js",
-  "scripts": {
+  "scripts": { 
     "test-e2e": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js e2eTest",
     "test-unit": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js unitTest",
     "start": "NODE_PATH=app/src node app/index.js",
