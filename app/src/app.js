@@ -63,7 +63,7 @@ server.listen(port, function() {
     active: true,
   }).then(() => {}, (err) => {
     logger.error(err);
-    process.exit(1);
+    // process.exit(1);
   });
 });
 
