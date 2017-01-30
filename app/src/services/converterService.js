@@ -4,6 +4,8 @@ var logger = require('logger');
 var SQLService = require('services/sqlService');
 var geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
 var arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
+const Sql2json = require('sql2json').sql2json;
+const Json2sql = require('sql2json').json2sql;
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
 const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
@@ -73,10 +75,13 @@ class ConverterService {
                 where += ' AND ';
             }
             
-            let esrigeojson = JSON.parse(fs.geometry);
+            logger.debug('fs.geometry', fs.geometry);
+            let esrigeojson = JSON.parse(fs.geometry.replace(/\\"/g, '"'));
+            let wkid = fs.inSR ? JSON.parse(fs.inSR.replace(/\\"/g, '"')) : null;
+            wkid = wkid.wkid || 4326;
             
             let geojson = arcgisToGeoJSON(esrigeojson);
-            where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.geometry)}'), 4326))`;
+            where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.geometry || geojson)}'), ${wkid}))`;
         } else if(params.geostore){
           let geojson = yield ConverterService.obtainGeoStore(params.geostore);
           if (!where){
@@ -99,12 +104,18 @@ class ConverterService {
                 ${fs.orderByFields ? `ORDER BY ${fs.orderByFields} `: ''}
                 ${fs.resultRecordCount ? `LIMIT ${fs.resultRecordCount }`: ''}`.replace(/\s\s+/g, ' ').trim();
       
-        let result = SQLService.checkSQL(sql);
+        let parsed = new Sql2json(sql).toJSON();
+        if (!parsed) {
+          return SQLService.generateError('Malformed query');
+        }
+        let result = SQLService.checkSQL(parsed);
+
         if(result && result.error){
             return result;
         }
         return {
-            sql: sql
+            query: sql,
+            parsed
         };
     }
 
@@ -131,78 +142,107 @@ class ConverterService {
         return geojson;
     }
 
-    static parseWhere(where) {
-        logger.debug('Parsing where', where);
-        CONTAIN_INTERSEC.lastIndex = 0;
-        OBTAIN_GEOJSON.lastIndex = 0;
-        const whereLower = where.toLowerCase();
-        const result = {
-            where,
-        };
-        if (CONTAIN_INTERSEC.test(whereLower)) {
-            logger.debug('Contain intersec');
-            CONTAIN_INTERSEC.lastIndex = 0;
-            let resultIntersec = CONTAIN_INTERSEC.exec(whereLower)[0];
-            let pos = whereLower.indexOf(resultIntersec);
-            result.where = `${where.substring(0, pos)} ${where.substring(pos + resultIntersec.length, where.length)}`.trim();
-            if (!result.where) {
-                delete result.where;
-            }
-            let geojson = OBTAIN_GEOJSON.exec(whereLower);
-            if (geojson && geojson.length > 1){
-                result.spatialRel = 'esriSpatialRelIntersects';
-                result.geometryType = 'esriGeometryPolygon';
-                result.inSR = JSON.stringify({
-                    wkid: 4326
-                });
-
-                result.geometry = JSON.stringify(ConverterService.convertGeoJSONToEsriGJSON(JSON.parse(geojson[1])));
-            }
+    static removeIntersect(node) {
+      if (node && node.type === 'function' && node.value.toLowerCase() === 'st_intersects') {
+        return null;
+      }
+      if (node && node.type === 'conditional') {
+        const left = ConverterService.removeIntersect(node.left);
+        const right = ConverterService.removeIntersect(node.right);
+        if (!left) {
+          return node.right;
+        } else if (!right) {
+          return node.left;
         }
-
-        return result;
+      }
+      return node;
     }
 
-    static obtainFSFromAST(ast){
+    static findIntersect(node, finded, result) {
+      if (node && node.type === 'string' && node.value && finded) {
+        try { 
+          const geojson = JSON.parse(node.value);
+          if (!result){
+            result = {};
+          }
+          result.geojson = geojson;
+          return result;
+        } catch(e){
+          return result;
+        }
+      }
+      if (node && node.type === 'number' && node.value && finded) {
+        if (!result){
+            result = {};
+          }
+        result.wkid = node.value;
+        return result;
+      }
+      if (node && node.type === 'function' && (node.value.toLowerCase() === 'st_intersects' || finded)) {
+        for (let i = 0, length = node.arguments.length; i < length; i++){
+          result = Object.assign(result || {}, ConverterService.findIntersect(node.arguments[i], true, result));
+          if (result && result.geojson && result.wkid) {
+            return result;
+          }
+        }
+      }
+      if (node && node.type === 'conditional') {
+        const left = ConverterService.findIntersect(node.left);
+        const right = ConverterService.findIntersect(node.right);
+        if (left) {
+          return left;
+        } else if (right) {
+          return right;
+        }
+      }
+      return null;
+    }
+
+    static parseWhere(where) {
+        logger.debug('Parsing where', where);
+        let geo = ConverterService.findIntersect(where);
+        let fs = {};
+        if (geo) {
+          fs.geometryType = 'esriGeometryPolygon';
+          fs.spatialRel = 'esriSpatialRelIntersects';              
+          fs.inSR = JSON.stringify({
+              wkid: geo.wkid
+          });
+          fs.geometry = JSON.stringify(geojsonToArcGIS(geo.geojson));
+          let pruneWhere = ConverterService.removeIntersect(where);
+          if (pruneWhere) {
+            fs.where = Json2sql.parseNodeWhere(pruneWhere);
+          }
+        } else {
+          fs.where = Json2sql.parseNodeWhere(where);
+        }
+        return fs;
+    }
+
+    static obtainFSFromAST(parsed){
         logger.info('Generating FeatureService object from ast object');
         let fs = {};
 
-        if(ast.select && ast.select.length > 0){
+        if(parsed.select && parsed.select.length > 0){
             let outFields = '';
             let outStatistics = [];
-            for(let i = 0, length = ast.select.length; i < length; i++){
-                obtainColAggrRegex.lastIndex = 0;
-                aggrFunctionsRegex.lastIndex = 0;
-                if(aggrFunctionsRegex.test(ast.select[i].expression)){
-                    //aggr function
-                    let parts = obtainColAggrRegex.exec(ast.select[i].expression);
-                    let obj = null;
-                    if (ConverterService.obtainAggrFun(ast.select[i].expression).toLowerCase().trim() === 'count'){
-                      fs.returnCountOnly = true;
-                    } else { 
-                      if(parts && parts.length > 1){
-                          obj = {
-                              onStatisticField: parts[1],
-                              statisticType: ConverterService.obtainAggrFun(ast.select[i].expression)
-                          };
-                          if(ast.select[i].alias){
-                              obj.outStatisticFieldName = ast.select[i].alias;
-                          }
-                          outStatistics.push(obj);
-                      } else {
-                          return {
-                              error: true,
-                              message: 'Query malformed. Function not found'
-                          };
-                      }
-                  }
-                } else {
-                    if(outFields !== ''){
-                        outFields += ',';
-                    }
-                    outFields += ast.select[i].expression;
+            for(let i = 0, length = parsed.select.length; i < length; i++){
+              const node = parsed.select[i];
+              if (node.type === 'function'){
+                let obj = {
+                  statisticType: node.value,
+                  onStatisticField: node.arguments[0].value
+                };
+                if (node.alias) {
+                  obj.outStatisticFieldName = node.alias;
                 }
-
+                outStatistics.push(obj);
+              } else {
+                if(outFields !== ''){
+                    outFields += ',';
+                }
+                outFields += node.value;
+              }
             }
             if(outFields) {
                 fs.outFields = outFields;
@@ -211,16 +251,16 @@ class ConverterService {
                 fs.outStatistics = JSON.stringify(outStatistics);
             }
         }
-        if(ast.from){
-            fs.tableName = ast.from[0].expression;
+        if(parsed.from){
+            fs.tableName = parsed.from;
         }
-        if(ast.where){
-            fs = Object.assign({}, fs, ConverterService.parseWhere(ast.where.expression));
+        if(parsed.where){
+            fs = Object.assign({}, fs, ConverterService.parseWhere(parsed.where));
         }
-        if(ast.group && ast.group.length > 0){
+        if(parsed.group && parsed.group.length > 0){
             let groupByFieldsForStatistics = '';
-            for(let i = 0, length = ast.group.length; i < length; i++){
-                groupByFieldsForStatistics += ast.group[i].expression;
+            for(let i = 0, length = parsed.group.length; i < length; i++){
+                groupByFieldsForStatistics += parsed.group[i];
                 if(i < length -1){
                     groupByFieldsForStatistics += ',';
                 }
@@ -228,10 +268,10 @@ class ConverterService {
             fs.groupByFieldsForStatistics = groupByFieldsForStatistics;
         }
 
-        if(ast.order && ast.order.length > 0){
+        if(parsed.orderBy && parsed.orderBy.length > 0){
             let orderByFields = '';
-            for(let i = 0, length = ast.order.length; i < length; i++){
-                orderByFields += ast.order[i].expression;
+            for(let i = 0, length = parsed.orderBy.length; i < length; i++){
+                orderByFields += parsed.orderBy[i].value;
                 if(i < length -1){
                     orderByFields += ',';
                 }
@@ -239,17 +279,17 @@ class ConverterService {
             fs.orderByFields = orderByFields;
         }
 
-        if(ast.limit){
-            fs.resultRecordCount = ast.limit.nb;
+        if(parsed.limit){
+            fs.resultRecordCount = parsed.limit;
             fs.supportsPagination = true;
         }
-        if(ast.geostore){
+        if(parsed.geostore){
           fs.geometryType = 'esriGeometryPolygon';
           fs.spatialRel = 'esriSpatialRelIntersects';              
           fs.inSR = JSON.stringify({
               wkid: 4326
           });
-          fs.geometry = JSON.stringify(geojsonToArcGIS(ast.geostore.features[0].geometry));
+          fs.geometry = JSON.stringify(geojsonToArcGIS(parsed.geostore.features[0].geometry));
         }
         return fs;
     }
@@ -278,24 +318,26 @@ class ConverterService {
     static * sql2FS(params){
         let sql = params.sql.trim();
         logger.info('Creating featureservice from sql', sql);
-        let result = SQLService.checkSQL(params.sql);
+        let parsed = new Sql2json(sql).toJSON();
+        if (!parsed) {
+          return SQLService.generateError('Malformed query');
+        }
+        let result = SQLService.checkSQL(parsed);
         if(result && result.error){
             return result;
         }
-        result = SQLService.obtainASTFromSQL(sql);
-        if(result && result.error){
-            return result;
-        }
+        
         if (params.geostore) {
           let geostore = yield ConverterService.obtainGeoStore(params.geostore);
-          result.ast.geostore = geostore;
+          parsed.geostore = geostore;
         }
-        result = ConverterService.obtainFSFromAST(result.ast);
+        result = ConverterService.obtainFSFromAST(parsed);
         if(result && result.error){
             return result;
         }
         return {
-            fs: result
+            fs: result,
+            parsed
         };
     }
 }

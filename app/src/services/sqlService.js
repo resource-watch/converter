@@ -3,6 +3,8 @@
 var simpleSqlParser = require('simple-sql-parser');
 var logger = require('logger');
 var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
+const Sql2json = require('sql2json').sql2json;
+const Json2sql = require('sql2json').json2sql;
 
 var deserializer = function(obj) {
   return function(callback) {
@@ -34,14 +36,14 @@ class SQLService {
     };
   }
 
-  static checkSQL(sql) {
-    logger.info('Checking sql ', sql);
-    let ast = simpleSqlParser.sql2ast(sql);
-    if (!ast.status) {
-      logger.debug(ast);
-      return SQLService.generateError('Malformed query');
+  static checkSQL(parsed) {
+    logger.info('Checking sql ');
+    if (parsed && parsed.select && parsed.select.length > 0 && parsed.from) {
+      return {
+        error: false
+      };
     }
-    return SQLService.correctSQL(ast.value);
+    return  SQLService.generateError('Malformed query');
   }
 
   static obtainASTFromSQL(sql) {
@@ -78,30 +80,58 @@ class SQLService {
 
   static * sql2SQL(data) {
     logger.debug('Converting sql to sql', data);
+    let parsed = new Sql2json(data.sql).toJSON();
+    if (!parsed) {
+      return SQLService.generateError('Malformed query');
+    }
     if (data.geostore) {
       logger.debug('Contain geostore. Obtaining geojson');
       let geostore = yield SQLService.obtainGeoStore(data.geostore);
       logger.debug('Completing query');
-      let ast = simpleSqlParser.sql2ast(data.sql);
-      if (!ast.status) {
-        return SQLService.generateError('Malformed query');
-      }
-      const intersection = `ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('${JSON.stringify(geostore.geojson.features[0].geometry)}'), 4326), the_geom)`;
-      logger.debug('ast', ast);
-      if (ast.value.where) {
-        ast.value.where.expression += ' AND ' + intersection;
-      } else {
-        ast.value.where = {
-          expression: intersection
+
+      const intersect = {
+        type: 'function',
+        value: 'ST_INTERSECTS',
+        arguments: [{
+          type: 'function',
+          value: 'ST_SetSRID',
+          arguments: [{
+            type: 'function',
+            value: 'ST_GeomFromGeoJSON',
+            arguments: [{
+              type: 'string',
+              value: JSON.stringify(geostore.geojson.features[0].geometry)
+            }],
+          }, {
+            type: 'number',
+            value: 4326
+          }]
+        }, {
+          type: 'literal',
+          value: 'the_geom'
+        }]
+      };
+
+      if (parsed.where) {
+        parsed.where = {
+          type: 'conditional',
+          value: 'and',
+          left: intersect,
+          right: parsed.where
         };
       }
-      var query = simpleSqlParser.ast2sql(ast);
-      data.sql = query;
-
     }
     logger.debug('sql converted!');
-    return data.sql;
+
+    const result = SQLService.checkSQL(parsed);
+    if (!result || result.error) {
+      return result;
+    }
+    return {
+      sql: Json2sql.toSQL(parsed),
+      parsed
+    };
   }
 }
 
-module.exports = SQLService;
+module.exports = SQLService;  
