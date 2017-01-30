@@ -111,6 +111,14 @@ class ConvertRouter {
     });
   }
 
+  static * json2SQL(){
+    logger.info('Converting json to sql');
+    this.body = ResultSerializer.serialize({
+      query: Json2sql.toSQL(this.request.body),
+      jsonSql: this.request.body
+    });
+  }
+
 }
 
 router.get('/fs2SQL', ConvertRouter.fs2SQL);
@@ -120,6 +128,6 @@ router.post('/sql2FS', ConvertRouter.sql2FS);
 router.get('/checkSQL', ConvertRouter.checkSQL);
 router.get('/sql2SQL', ConvertRouter.sql2SQL);
 router.post('/sql2SQL', ConvertRouter.sql2SQL);
-
+router.post('/json2SQL', ConvertRouter.json2SQL);
 
 module.exports = router;

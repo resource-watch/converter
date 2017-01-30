@@ -51,5 +51,12 @@
             "method": "POST",
             "path": "/api/v1/convert/sql2SQL"
         }]
+    }, {
+        "url": "/convert/json2SQL",
+        "method": "POST",
+        "endpoints": [{
+            "method": "POST",
+            "path": "/api/v1/convert/json2SQL"
+        }]
     }]
 }
