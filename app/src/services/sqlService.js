@@ -111,7 +111,6 @@ class SQLService {
           value: 'the_geom'
         }]
       };
-
       if (parsed.where) {
         parsed.where = {
           type: 'conditional',
@@ -119,6 +118,8 @@ class SQLService {
           left: intersect,
           right: parsed.where
         };
+      } else {
+        parsed.where = intersect;
       }
     }
     logger.debug('sql converted!');
