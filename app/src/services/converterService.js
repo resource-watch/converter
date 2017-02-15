@@ -219,6 +219,32 @@ class ConverterService {
     return fs;
   }
 
+  static parseFunction(nodeFun) {
+    const args = [];
+    for (let i = 0, length = nodeFun.arguments.length; i < length; i++) {
+        const node = nodeFun.arguments[i];
+        switch (node.type) {
+
+            case 'literal':
+                args.push(node.value);
+                break;
+            case 'string':
+                args.push(`'${node.value}'`);
+                break;
+            case 'number':
+                args.push(node.value);
+                break;
+            case 'function':
+                args.push(ConverterService.parseFunction(node));
+                break;
+            default:
+                break;
+
+        }
+    }
+    return `${nodeFun.value}(${args.join(',')})${nodeFun.alias ? ` AS ${nodeFun.alias}` : ''}`;
+};
+
   static parseGroupBy(group) {
     if (group) {
         const result = [];
@@ -230,7 +256,7 @@ class ConverterService {
                     result.push(`${node.value}`);
                     break;
                 case 'function':
-                    result.push(parseFunction(node));
+                    result.push(ConverterService.parseFunction(node));
                     break;
                 default:
                     break;
@@ -252,7 +278,7 @@ class ConverterService {
       for (let i = 0, length = parsed.select.length; i < length; i++) {
         const node = parsed.select[i];
         if (node.type === 'function') {
-          if (node.value.toLowerCase() === 'count') {
+          if (node.value.toLowerCase() === 'count' && parsed.select.length === 1) {
             fs.returnCountOnly = true;
           } else {
             let obj = {
