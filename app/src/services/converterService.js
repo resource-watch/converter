@@ -219,6 +219,29 @@ class ConverterService {
     return fs;
   }
 
+  static parseGroupBy(group) {
+    if (group) {
+        const result = [];
+        for (let i = 0, length = group.length; i < length; i++) {
+            const node = group[i];
+            switch (node.type) {
+
+                case 'literal':
+                    result.push(`${node.value}`);
+                    break;
+                case 'function':
+                    result.push(parseFunction(node));
+                    break;
+                default:
+                    break;
+
+            }
+        }
+        return `${result.join(',')}`;
+    }
+    return '';
+};
+
   static obtainFSFromAST(parsed) {
     logger.info('Generating FeatureService object from ast object');
     let fs = {};
@@ -263,13 +286,7 @@ class ConverterService {
       fs = Object.assign({}, fs, ConverterService.parseWhere(parsed.where));
     }
     if (parsed.group && parsed.group.length > 0) {
-      let groupByFieldsForStatistics = '';
-      for (let i = 0, length = parsed.group.length; i < length; i++) {
-        groupByFieldsForStatistics += parsed.group[i];
-        if (i < length - 1) {
-          groupByFieldsForStatistics += ',';
-        }
-      }
+      let groupByFieldsForStatistics = ConverterService.parseGroupBy(parsed.group);
       fs.groupByFieldsForStatistics = groupByFieldsForStatistics;
     }
 
