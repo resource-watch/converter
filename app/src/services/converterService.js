@@ -252,7 +252,7 @@ class ConverterService {
       for (let i = 0, length = parsed.select.length; i < length; i++) {
         const node = parsed.select[i];
         if (node.type === 'function') {
-          if (node.value.toLowerCase() === 'count') {
+          if (node.value.toLowerCase() === 'count' && parsed.select.length === 1) {
             fs.returnCountOnly = true;
           } else {
             let obj = {
