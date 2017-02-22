@@ -3,7 +3,7 @@
   "version": "1.3.1",
   "description": "Converter API",
   "main": "index.js",
-  "scripts": { 
+  "scripts": {
     "test-e2e": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js e2eTest",
     "test-unit": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js unitTest",
     "start": "NODE_PATH=app/src node app/index.js",
@@ -40,7 +40,7 @@
     "koa-router": "5.4.0",
     "newrelic": "1.27.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
-    "sql2json": "1.4.3"
+    "sql2json": "1.4.4"
   },
   "devDependencies": {
     "co-mocha": "1.1.2",
