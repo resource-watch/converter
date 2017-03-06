@@ -38,7 +38,7 @@ class SQLService {
 
   static checkSQL(parsed) {
     logger.info('Checking sql ');
-    if (parsed && parsed.select && parsed.select.length > 0 && parsed.from) {
+    if (parsed && ((parsed.select && parsed.select.length > 0) || parsed.delete) && parsed.from) {
       return {
         error: false
       };

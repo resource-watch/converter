@@ -10,7 +10,7 @@ var resultSerializer = new JSONAPISerializer('result', {
       attributes: ['outStatistics', 'tableName', 'geometryType', 'geometry', 'outFields', 'groupByFieldsForStatistics', 'orderByFields', 'resultRecordCount', 'supportsPagination', 'spatialRel', 'inSR', 'where', 'returnCountOnly', 'outStatisticFieldName' ],
     },
     jsonSql: {
-      attributes: ['select', 'from', 'where', 'group', 'orderBy', 'limit', 'offset']
+      attributes: ['select', 'from', 'delete', 'where', 'group', 'orderBy', 'limit', 'offset']
     },
     keyForAttribute: 'camelCase'
 });
