@@ -243,7 +243,7 @@ class ConverterService {
         }
     }
     return `${nodeFun.value}(${args.join(',')})${nodeFun.alias ? ` AS ${nodeFun.alias}` : ''}`;
-};
+}
 
   static parseGroupBy(group) {
     if (group) {
@@ -266,7 +266,7 @@ class ConverterService {
         return `${result.join(',')}`;
     }
     return '';
-};
+}
 
   static obtainFSFromAST(parsed) {
     logger.info('Generating FeatureService object from ast object');

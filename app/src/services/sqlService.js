@@ -5,6 +5,7 @@ var logger = require('logger');
 var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
+const GeoStoreNotFound = require('errors/geoStoreNotFound');
 
 var deserializer = function(obj) {
   return function(callback) {
@@ -72,7 +73,7 @@ class SQLService {
     } catch(err){
       logger.error('Error obtaining geostore', err);
       if (err && err.statusCode === 404) {
-        throw new Error('Geostore not found');
+        throw new GeoStoreNotFound(404, 'Geostore not found');
       } 
       throw new Error('Error obtaining geostore');
     }
