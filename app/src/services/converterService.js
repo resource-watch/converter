@@ -216,9 +216,6 @@ class ConverterService {
     } else {
       fs.where = Json2sql.parseNodeWhere(where);
     }
-    if (!fs.where) {
-      fs.where = '1=1';
-    }
     return fs;
   }
 
@@ -313,6 +310,8 @@ class ConverterService {
     }
     if (parsed.where) {
       fs = Object.assign({}, fs, ConverterService.parseWhere(parsed.where));
+    } else {
+      fs = Object.assign({}, fs, {where: '1=1'});
     }
     if (parsed.group && parsed.group.length > 0) {
       let groupByFieldsForStatistics = ConverterService.parseGroupBy(parsed.group);
