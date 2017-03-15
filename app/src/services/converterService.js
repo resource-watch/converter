@@ -216,6 +216,9 @@ class ConverterService {
     } else {
       fs.where = Json2sql.parseNodeWhere(where);
     }
+    if (!fs.where) {
+      fs.where = '1=1';
+    }
     return fs;
   }
 
