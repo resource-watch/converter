@@ -6,6 +6,7 @@ var geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
 var arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
+const QueryNotValid = require('errors/queryNotValid');
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
 const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
@@ -281,6 +282,9 @@ class ConverterService {
           if (node.value.toLowerCase() === 'count' && parsed.select.length === 1) {
             fs.returnCountOnly = true;
           } else {
+            if (node.value.toLowerCase() === 'count' && node.arguments[0].value === '*'){
+              throw new QueryNotValid(400, 'Invalid query. ArcGis does not support count(*) with more columns');
+            }
             let obj = {
               statisticType: node.value,
               onStatisticField: node.arguments[0].value
