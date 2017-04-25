@@ -90,6 +90,14 @@ class ConverterService {
       } else {
         where += ' AND ';
       }
+      where += `ST_INTERSECTS(the_geom, ST_SETSRID(aST_GeomFromGeoJSON('${JSON.stringify(geojson.features[0].geometry)}'), 4326))`;
+    } else if (params.geojson) {
+      const geojson = ConverterService.checkGeojson(params.geojson);
+      if (!where) {
+        where = 'WHERE ';
+      } else {
+        where += ' AND ';
+      }
       where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.features[0].geometry)}'), 4326))`;
     }
     return where;
@@ -337,13 +345,13 @@ class ConverterService {
       fs.resultRecordCount = parsed.limit;
       fs.supportsPagination = true;
     }
-    if (parsed.geostore) {
+    if (parsed.geojson) {
       fs.geometryType = 'esriGeometryPolygon';
       fs.spatialRel = 'esriSpatialRelIntersects';
       fs.inSR = JSON.stringify({
         wkid: 4326
       });
-      fs.geometry = JSON.stringify(geojsonToArcGIS(parsed.geostore.features[0].geometry));
+      fs.geometry = JSON.stringify(geojsonToArcGIS(parsed.geojson.features[0].geometry));
     }
     return fs;
   }
@@ -369,6 +377,24 @@ class ConverterService {
     }
   }
 
+  static checkGeojson(geojson) {
+    if (geojson.type.toLowerCase() === 'polygon') {
+      return {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: geojson
+        }]
+      };
+    } else if (geojson.type.toLowerCase() === 'feature') {
+      return {
+        type: 'FeatureCollection',
+        features: [geojson]
+      };
+    }
+    return geojson;
+  }
+
   static * sql2FS(params) {
     let sql = params.sql.trim();
     logger.info('Creating featureservice from sql', sql);
@@ -380,10 +406,13 @@ class ConverterService {
     if (result && result.error) {
       return result;
     }
-
+    if (params.geojson) {
+      const geojson = ConverterService.checkGeojson(params.geojson);
+      parsed.geojson = geojson;
+    }
     if (params.geostore) {
-      let geostore = yield ConverterService.obtainGeoStore(params.geostore);
-      parsed.geostore = geostore;
+      let geojson = yield ConverterService.obtainGeoStore(params.geostore);
+      parsed.geojson = geojson;
     }
     result = ConverterService.obtainFSFromAST(parsed);
     if (result && result.error) {
