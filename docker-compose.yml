@@ -1,5 +1,5 @@
 prod:
-  image: vizzuality/converter:1.4.0${STAGING}
+  image: vizzuality/converter:1.4.1${STAGING}
   ports:
     - "4100"
   env_file:

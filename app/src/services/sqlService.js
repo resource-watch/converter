@@ -7,8 +7,8 @@ const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
 const GeoStoreNotFound = require('errors/geoStoreNotFound');
 
-var deserializer = function(obj) {
-  return function(callback) {
+var deserializer = function (obj) {
+  return function (callback) {
     new JSONAPIDeserializer({
       keyForAttribute: 'camelCase'
     }).deserialize(obj, callback);
@@ -44,7 +44,7 @@ class SQLService {
         error: false
       };
     }
-    return  SQLService.generateError('Malformed query');
+    return SQLService.generateError('Malformed query');
   }
 
   static obtainASTFromSQL(sql) {
@@ -65,18 +65,36 @@ class SQLService {
         method: 'GET',
         json: true
       });
-      
+
       let geostore = yield deserializer(result);
       if (geostore) {
         return geostore;
       }
-    } catch(err){
+    } catch (err) {
       logger.error('Error obtaining geostore', err);
       if (err && err.statusCode === 404) {
         throw new GeoStoreNotFound(404, 'Geostore not found');
-      } 
+      }
       throw new Error('Error obtaining geostore');
     }
+  }
+
+  static checkGeojson(geojson) {
+    if (geojson.type.toLowerCase() === 'polygon') {
+      return {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: geojson
+        }]
+      };
+    } else if (geojson.type.toLowerCase() === 'feature') {
+      return {
+        type: 'FeatureCollection',
+        features: [geojson]
+      };
+    }
+    return geojson;
   }
 
   static * sql2SQL(data) {
@@ -85,10 +103,17 @@ class SQLService {
     if (!parsed) {
       return SQLService.generateError('Malformed query');
     }
-    if (data.geostore) {
-      logger.debug('Contain geostore. Obtaining geojson');
-      let geostore = yield SQLService.obtainGeoStore(data.geostore);
-      logger.debug('Completing query');
+    if (data.geostore || data.geojson) {
+      let geojson = null;
+      if (data.geojson) {
+        geojson = SQLService.checkGeojson(data.geojson);
+      }
+      if (data.geostore) {
+        logger.debug('Contain geostore. Obtaining geojson');
+        let geostore = yield SQLService.obtainGeoStore(data.geostore);
+        logger.debug('Completing query');
+        geojson = geostore.geojson;
+      }
 
       const intersect = {
         type: 'function',
@@ -101,7 +126,7 @@ class SQLService {
             value: 'ST_GeomFromGeoJSON',
             arguments: [{
               type: 'string',
-              value: JSON.stringify(geostore.geojson.features[0].geometry)
+              value: JSON.stringify(geojson.features[0].geometry)
             }],
           }, {
             type: 'number',
@@ -136,4 +161,4 @@ class SQLService {
   }
 }
 
-module.exports = SQLService;  
+module.exports = SQLService;
