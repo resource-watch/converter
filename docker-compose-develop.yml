@@ -9,6 +9,7 @@ develop:
     LOCAL_URL: http://mymachine:4100
     PORT: 4100
     API_VERSION: v1
+    CT_REGISTER_MODE: auto
   command: develop
   volumes:
     - ./app:/opt/converter/app
