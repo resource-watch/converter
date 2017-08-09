@@ -40,7 +40,7 @@
     "koa-router": "5.4.0",
     "newrelic": "1.27.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
-    "sql2json": "1.5.22"
+    "sql2json": "1.5.23"
   },
   "devDependencies": {
     "co-mocha": "1.1.2",
