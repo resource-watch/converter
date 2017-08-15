@@ -99,7 +99,7 @@ class ConvertRouter {
     this.assert(params.sql, 400, 'SQL param is required');
     
     
-    let result = yield SQLService.sql2SQL(params);    
+    let result = yield SQLService.sql2SQL(params, this.query.experimental);    
     
     if (result && result.error) {
       this.throw(400, result.message);
