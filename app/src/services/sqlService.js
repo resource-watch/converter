@@ -97,9 +97,9 @@ class SQLService {
     return geojson;
   }
 
-  static * sql2SQL(data) {
+  static * sql2SQL(data, experimental= false) {
     logger.debug('Converting sql to sql', data);
-    let parsed = new Sql2json(data.sql).toJSON();
+    let parsed = new Sql2json(data.sql, experimental).toJSON();
     if (!parsed) {
       return SQLService.generateError('Malformed query');
     }
