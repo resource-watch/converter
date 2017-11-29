@@ -114,29 +114,61 @@ class SQLService {
         logger.debug('Completing query');
         geojson = geostore.geojson;
       }
-
-      const intersect = {
-        type: 'function',
-        value: 'ST_INTERSECTS',
-        arguments: [{
+      let intersect = null;
+      if (isRaster) {
+        intersect = {
           type: 'function',
-          value: 'ST_SetSRID',
+          value: 'ST_INTERSECTS',
           arguments: [{
             type: 'function',
-            value: 'ST_GeomFromGeoJSON',
+            value: 'ST_SetSRID',
             arguments: [{
-              type: 'string',
-              value: `'${JSON.stringify(geojson.features[0].geometry)}'`
-            }],
+              type: 'function',
+              value: 'ST_GeomFromGeoJSON',
+              arguments: [{
+                type: 'string',
+                value: `'${JSON.stringify(geojson.features[0].geometry)}'`
+              }],
+            }, {
+              type: 'number',
+              value: 4326
+            }]
           }, {
-            type: 'number',
-            value: 4326
+            type: 'function',
+            value: 'ST_Transform',
+            arguments: [{
+              type: 'literal',
+              value: 'the_raster_webmercator'
+            }, {
+              type: 'number',
+              value: 4326
+            }]
           }]
-        }, {
-          type: 'literal',
-          value: !isRaster ? 'the_geom' : 'the_raster_webmercator'
-        }]
-      };
+        };
+      } else {
+        intersect = {
+          type: 'function',
+          value: 'ST_INTERSECTS',
+          arguments: [{
+            type: 'function',
+            value: 'ST_SetSRID',
+            arguments: [{
+              type: 'function',
+              value: 'ST_GeomFromGeoJSON',
+              arguments: [{
+                type: 'string',
+                value: `'${JSON.stringify(geojson.features[0].geometry)}'`
+              }],
+            }, {
+              type: 'number',
+              value: 4326
+            }]
+          }, {
+            type: 'literal',
+            value: 'the_geom'
+          }]
+        };
+      }
       if (parsed.where) {
         parsed.where = {
           type: 'conditional',
