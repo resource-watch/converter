@@ -97,7 +97,7 @@ class SQLService {
     return geojson;
   }
 
-  static * sql2SQL(data, experimental= false) {
+  static * sql2SQL(data, isRaster = false, experimental= false) {
     logger.debug('Converting sql to sql', data);
     let parsed = new Sql2json(data.sql, experimental).toJSON();
     if (!parsed) {
@@ -134,7 +134,7 @@ class SQLService {
           }]
         }, {
           type: 'literal',
-          value: 'the_geom'
+          value: !isRaster ? 'the_geom' : 'the_raster_webmercator'
         }]
       };
       if (parsed.where) {
