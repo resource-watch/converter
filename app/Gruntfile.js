@@ -9,26 +9,6 @@ module.exports = function (grunt) {
 
 
         clean: {},
-        jshint: {
-            js: {
-                src: [
-                    'app/src/**/*.js'
-                ],
-                options: {
-                    jshintrc: true
-                },
-                globals: {}
-            },
-            jsTest: {
-                src: [
-                    'app/test/**/*.js'
-                ],
-                options: {
-                    jshintrc: true
-                },
-                globals: {}
-            }
-        },
         express: {
             dev: {
                 options: {
@@ -41,15 +21,6 @@ module.exports = function (grunt) {
         },
 
         mochaTest: {
-            unit: {
-                options: {
-                    reporter: 'spec',
-                    quiet: false, // Optionally suppress output to standard out (defaults to false)
-                    clearRequireCache: true, // Optionally clear the require cache before running tests (defaults to false)
-                    require: 'co-mocha'
-                },
-                src: ['app/test/unit/**/*.test.js']
-            },
             e2e: {
                 options: {
                     reporter: 'spec',
@@ -91,19 +62,29 @@ module.exports = function (grunt) {
                     spawn: false
                 }
             },
-
+        },
+        nyc: {
+            cover: {
+                options: {
+                    include: ['app/src/**'],
+                    exclude: '*.test.*',
+                    reporter: ['lcov', 'text-summary'],
+                    reportDir: 'coverage',
+                    all: true
+                },
+                cmd: false,
+                args: ['grunt', '--gruntfile', 'app/Gruntfile.js', 'mochaTest:e2e']
+            }
         }
     });
 
 
-    grunt.registerTask('unitTest', ['mochaTest:unit']);
-
-    grunt.registerTask('e2eTest', ['express:dev', 'mochaTest:e2e']);
-
-    grunt.registerTask('test', ['jshint', 'unitTest']);
+    grunt.registerTask('test', ['mochaTest:e2e']);
 
     grunt.registerTask('serve', ['express:dev', 'watch']);
 
     grunt.registerTask('default', 'serve');
+
+    grunt.loadNpmTasks('grunt-simple-nyc');
 
 };
