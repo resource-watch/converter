@@ -1,6 +1,7 @@
 # GFW Fires API
 
 [![Build Status](https://travis-ci.org/resource-watch/converter.svg?branch=develop)](https://travis-ci.org/resource-watch/converter)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b67e263c0e624c8bb50f/test_coverage)](https://codeclimate.com/github/resource-watch/converter/test_coverage)
 
 This repository contains the microservice that converts RW API queries between different formats
 
