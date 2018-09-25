@@ -59,7 +59,7 @@ describe('sql2SQL conversion tests', () => {
     it('Select all query with grouping (select * from dataset group by field) conversion should be successful', async () => {
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2'.toUpperCase();
         const groupByFieldName = 'foo'.toUpperCase();
-        const query = `select * from ${datasetId} group by "${groupByFieldName}"`.toUpperCase();
+        const query = `select * from ${datasetId} group by ${groupByFieldName}`.toUpperCase();
 
         const reply = {
             data: {
@@ -109,7 +109,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT "${fieldAName}", "${fieldBName}" FROM ${datasetId}`,
+                    query: `SELECT ${fieldAName}, ${fieldBName} FROM ${datasetId}`,
                     jsonSql: {
                         select: [
                             {
@@ -151,7 +151,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT ${functionName}("${fieldName}") FROM ${datasetId}`,
+                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId}`,
                     jsonSql: {
                         select: [
                             {
@@ -194,7 +194,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT ${functionName}("${fieldName}") FROM ${datasetId} GROUP BY ${functionName}("${fieldName}")`,
+                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}(${fieldName})`,
                     jsonSql: {
                         select: [
                             {
@@ -251,7 +251,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT ${functionName}("${fieldName}") FROM ${datasetId} GROUP BY ${functionName}( 'NAME'="${fieldName}")`,
+                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}( 'NAME'="${fieldName}")`,
                     jsonSql: {
                         select: [
                             {
@@ -308,7 +308,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT DISTINCT "${fieldName}" FROM ${datasetId} WHERE ${fieldName} IS NOT NULL GROUP BY "${fieldName}" ORDER BY "${fieldName}"`,
+                    query: `SELECT DISTINCT ${fieldName} FROM ${datasetId} WHERE ${fieldName} IS NOT NULL GROUP BY ${fieldName} ORDER BY ${fieldName}`,
                     jsonSql: {
                         select: [
                             {

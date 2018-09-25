@@ -1,18 +1,18 @@
 'use strict';
 
-var Router = require('koa-router');
-var logger = require('logger');
-var ConverterService = require('services/converterService');
-var SQLService = require('services/sqlService');
-var ResultSerializer = require('serializers/resultSerializer');
+const Router = require('koa-router');
+const logger = require('logger');
+const ConverterService = require('services/converterService');
+const SQLService = require('services/sqlService');
+const ResultSerializer = require('serializers/resultSerializer');
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
-var router = new Router({
+const router = new Router({
     prefix: '/api/v1/convert'
 });
 
 
-var hack = function (sql) {
+const hack = function (sql) {
     return sql.replace(/  +/g, ' ').replace(/\(\s\s*'/g, '(\'').replace(/\(\s\s*"/g, '("').trim();
 };
 

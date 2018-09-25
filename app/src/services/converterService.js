@@ -1,9 +1,9 @@
 'use strict';
 
-var logger = require('logger');
-var SQLService = require('services/sqlService');
-var geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
-var arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
+const logger = require('logger');
+const SQLService = require('services/sqlService');
+const geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
+const arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
 const QueryNotValid = require('errors/queryNotValid');

@@ -1,17 +1,17 @@
 'use strict';
 //load modules
 
-var logger = require('logger');
-var path = require('path');
-var koa = require('koa');
-var bodyParser = require('koa-bodyparser');
-var config = require('config');
-var koaLogger = require('koa-logger');
-var ErrorSerializer = require('serializers/errorSerializer');
+const logger = require('logger');
+const path = require('path');
+const koa = require('koa');
+const bodyParser = require('koa-bodyparser');
+const config = require('config');
+const koaLogger = require('koa-logger');
+const ErrorSerializer = require('serializers/errorSerializer');
 const ctRegisterMicroservice = require('ct-register-microservice-node');
 
 // instance of koa
-var app = koa();
+const app = koa();
 
 //if environment is dev then load koa-logger
 if (process.env.NODE_ENV === 'dev') {
@@ -40,11 +40,11 @@ app.use(function* (next) {
 app.use(require('routes/api/v1/convertRouter').middleware());
 
 //Instance of http module
-var server = require('http').Server(app.callback());
+const server = require('http').Server(app.callback());
 
 // get port of environment, if not exist obtain of the config.
 // In production environment, the port must be declared in environment variable
-var port = process.env.PORT || config.get('service.port');
+const port = process.env.PORT || config.get('service.port');
 
 const serverInstance = server.listen(port, function () {
     ctRegisterMicroservice.register({
