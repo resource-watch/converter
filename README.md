@@ -1,16 +1,15 @@
 # GFW Fires API
 
+[![Build Status](https://travis-ci.org/resource-watch/converter.svg?branch=develop)](https://travis-ci.org/resource-watch/converter)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/b67e263c0e624c8bb50f/test_coverage)](https://codeclimate.com/github/resource-watch/converter/test_coverage)
 
-This repository is the microservice that it implement the viirs fires funcionality and exposed the /viirs-active-fires endpoint in the api-gateway
-
-[View the documentation for this
-API](http://gfw-api.github.io/swagger-ui/?url=https://raw.githubusercontent.com/gfw-api/gfw-viirs-fires-api/master/app/microservice/swagger.yml#/VIIRS-FIRES)
+This repository contains the microservice that converts RW API queries between different formats
 
 ## First time user
 Perform the following steps:
 * [Install docker](https://docs.docker.com/engine/installation/)
-* Clone this repository: ```git clone git@github.com:Vizzuality/gfw-viirs-fires-api.git```
-* Enter in the directory (cd gfw-viirs-fires-api)
+* Clone this repository
+* Enter in the directory
 * After, you open a terminal (if you have mac or windows, open a terminal with the 'Docker Quickstart Terminal') and execute the next command:
 
 ```bash
@@ -31,60 +30,4 @@ docker-compose -f docker-compose-develop.yml build
 Remember: In windows and Mac, open the terminal with 'Docker Quickstart Terminal'
 ```
 docker-compose -f docker-compose-test.yml run test
-```
-
-## Install in heroku
-
-Is necessary define the next environment variables:
-* API_GATEWAY_URI => Url the register of the API Gateway. Remember: If the authentication is active in API Gateway, add the username and password in the url
-* NODE_ENV => Environment (prod, staging, dev)
-* CARTODB_APIKEY => API key to connect to CartoDB
-* CARTODB_USER => User to connect to CartoDB
-
-Is necessary the pem file of Google Earth Engine authentication in the root of the project
-
-
-
-# Config
-
-## register.json
-This file contain the configuration about the endpoints that public the microservice. This json will send to the apigateway. it can contain variables:
-* #(service.id) => Id of the service setted in the config file by environment
-* #(service.name) => Name of the service setted in the config file by environment
-* #(service.uri) => Base uri of the service setted in the config file by environment
-
-Example:
-````
-{
-    "id": "#(service.id)",
-    "name": "#(service.name)",
-    "urls": [{
-        "url": "/story",
-        "method": "POST",
-        "endpoints": [{
-            "method": "POST",
-            "baseUrl": "#(service.uri)",
-            "path": "/api/v1/story",
-            "data": ["loggedUser"]
-        }]
-    }, {
-        "url": "/story/:id",
-        "method": "GET",
-        "endpoints": [{
-            "method": "GET",
-            "baseUrl": "#(service.uri)",
-            "path": "/api/v1/story/:id"
-        }]
-    }, {
-        "url": "/user",
-        "method": "GET",
-        "endpoints": [{
-            "method": "GET",
-            "baseUrl": "#(service.uri)",
-            "path": "/api/v1/story"
-        }]
-    }]
-}
-
-
 ```
