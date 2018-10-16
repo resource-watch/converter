@@ -1,0 +1,1 @@
+- Add support for `SELECT DISTINCT columnName` query types in FS query generator
