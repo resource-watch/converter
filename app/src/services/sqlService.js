@@ -127,7 +127,7 @@ class SQLService {
               value: 'ST_GeomFromGeoJSON',
               arguments: [{
                 type: 'string',
-                value: `'${JSON.stringify(geojson.features[0].geometry)}'`
+                value: `${JSON.stringify(geojson.features[0].geometry)}`
               }],
             }, {
               type: 'number',
@@ -157,7 +157,7 @@ class SQLService {
               value: 'ST_GeomFromGeoJSON',
               arguments: [{
                 type: 'string',
-                value: `'${JSON.stringify(geojson.features[0].geometry)}'`
+                value: `${JSON.stringify(geojson.features[0].geometry)}`
               }],
             }, {
               type: 'number',
