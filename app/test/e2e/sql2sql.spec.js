@@ -508,8 +508,8 @@ describe('sql2SQL conversion tests', () => {
             }
         };
 
-        nock(process.env.CT_URL, { "encodedQueryParams": true })
-            .get('/v1/geostore/89cb48bcd6888a2d4c95df12babff9cc')
+        nock(process.env.CT_URL)
+            .get(`/v1/geostore/${geostore}`)
             .reply(200, {
                 "data": {
                     "type": "geoStore",

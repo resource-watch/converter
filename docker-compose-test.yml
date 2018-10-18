@@ -6,4 +6,7 @@ test:
   environment:
     NODE_ENV: test
     HOST_IP: 127.0.0.1
+    CT_URL: http://mymachine:9000
+    CT_REGISTER_MODE: auto
+    API_VERSION: v1
   command: test
