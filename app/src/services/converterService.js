@@ -220,10 +220,10 @@ class ConverterService {
             fs.geometry = JSON.stringify(geojsonToArcGIS(geo.geojson));
             let pruneWhere = ConverterService.removeIntersect(where);
             if (pruneWhere) {
-                fs.where = Json2sql.parseNodeWhere(pruneWhere);
+                fs.where = Json2sql.parseWhere(pruneWhere);
             }
         } else {
-            fs.where = Json2sql.parseNodeWhere(where);
+            fs.where = Json2sql.parseWhere(where);
         }
         return fs;
     }
