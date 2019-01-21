@@ -342,7 +342,7 @@ class ConverterService {
 
         if (parsed.orderBy && parsed.orderBy.length > 0) {
             let orderByFields = '';
-            for (let i = 0, length = parsed.orderBy.length; i < length; i++) {
+            for (let i = 0, { length } = parsed.orderBy; i < length; i++) {
                 orderByFields += parsed.orderBy[i].value;
                 if (i < length - 1) {
                     orderByFields += ',';
