@@ -423,18 +423,18 @@ describe('sql2SQL conversion tests', () => {
                                 type: 'literal'
                             }
                         ],
-                        where: {
-                            left: {
+                        where: [{
+                            left: [{
                                 type: "literal",
                                 value: "foo"
-                            },
-                            right: {
+                            }],
+                            right: [{
                                 type: "literal",
                                 value: "NULL"
-                            },
+                            }],
                             type: "operator",
                             value: "IS NOT"
-                        }
+                        }]
                     }
                 },
                 relationships: {}
