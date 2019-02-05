@@ -250,7 +250,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}( 'name'="${fieldName}")`,
+                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}('name'="${fieldName}")`,
                     jsonSql: {
                         select: [
                             {
@@ -308,7 +308,7 @@ describe('sql2SQL conversion tests', () => {
                 type: 'result',
                 id: 'undefined',
                 attributes: {
-                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}( 'name'="${fieldName}", 'format'='yyyy-MM-dd','2014-08-18','2014-08-17','now-8d','now-7d','now-6d','now')`,
+                    query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}('name'="${fieldName}", 'format'='yyyy-MM-dd','2014-08-18','2014-08-17','now-8d','now-7d','now-6d','now')`,
                     jsonSql: {
                         select: [
                             {
