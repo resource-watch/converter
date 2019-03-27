@@ -1,8 +1,4 @@
-'use strict';
-//load modules
-
 const logger = require('logger');
-const path = require('path');
 const koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const config = require('config');
@@ -27,8 +23,13 @@ app.use(function* (next) {
     try {
         yield next;
     } catch (err) {
-        this.status = err.status || 500;
-        logger.error(err);
+        this.status = error.status || 500;
+
+        if (this.status >= 500) {
+            logger.error(error);
+        } else {
+            logger.info(error);
+        }
         this.body = ErrorSerializer.serializeError(this.status, err.message);
         if (process.env.NODE_ENV === 'prod' && this.status === 500) {
             this.body = 'Unexpected error';
