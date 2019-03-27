@@ -23,9 +23,9 @@ app.use(function* (next) {
     try {
         yield next;
     } catch (err) {
-        ctx.status = error.status || 500;
+        this.status = error.status || 500;
 
-        if (ctx.status >= 500) {
+        if (this.status >= 500) {
             logger.error(error);
         } else {
             logger.info(error);
