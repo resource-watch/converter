@@ -344,6 +344,9 @@ class ConverterService {
             let orderByFields = '';
             for (let i = 0, { length } = parsed.orderBy; i < length; i++) {
                 orderByFields += parsed.orderBy[i].value;
+                if (parsed.orderBy[i].direction) {
+                    orderByFields += ' ' + parsed.orderBy[i].direction;
+                }
                 if (i < length - 1) {
                     orderByFields += ',';
                 }
