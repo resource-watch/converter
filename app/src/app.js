@@ -23,12 +23,12 @@ app.use(function* (next) {
     try {
         yield next;
     } catch (err) {
-        this.status = error.status || 500;
+        this.status = err.status || 500;
 
         if (this.status >= 500) {
-            logger.error(error);
+            logger.error(err);
         } else {
-            logger.info(error);
+            logger.info(err);
         }
         this.body = ErrorSerializer.serializeError(this.status, err.message);
         if (process.env.NODE_ENV === 'prod' && this.status === 500) {
