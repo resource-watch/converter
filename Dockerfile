@@ -1,8 +1,8 @@
-FROM mhart/alpine-node:7.6
-MAINTAINER raul.requero@vizzuality.com
+FROM node:12.11-alpine
+MAINTAINER info@vizzuality.com
 
 ENV NAME converter
-ENV USER microservice
+ENV USER converter
 
 RUN apk update && apk upgrade && \
     apk add --no-cache --update bash git
