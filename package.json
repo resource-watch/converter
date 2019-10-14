@@ -22,11 +22,8 @@
     "javascript",
     "koa"
   ],
-  "author": "rrequero",
+  "author": "https://github.com/vizzuality",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/gfw-api/converter/issues"
-  },
   "homepage": "https://github.com/gfw-api/converter#readme",
   "dependencies": {
     "arcgis-to-geojson-utils": "1.0.1",
