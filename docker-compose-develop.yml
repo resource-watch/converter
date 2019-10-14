@@ -1,15 +1,15 @@
-develop:
-  extends:
-    file: base.yml
-    service: base
-  container_name: converter-develop
-  environment:
-    NODE_ENV: dev
-    CT_URL: http://mymachine:9000
-    LOCAL_URL: http://mymachine:4100
-    PORT: 4100
-    API_VERSION: v1
-    CT_REGISTER_MODE: auto
-  command: develop
-  volumes:
-    - ./app:/opt/converter/app
+version: "3"
+services:
+  develop:
+    build: .
+    container_name: converter-develop
+    environment:
+      NODE_ENV: dev
+      CT_URL: http://mymachine:9000
+      LOCAL_URL: http://mymachine:4100
+      PORT: 4100
+      API_VERSION: v1
+      CT_REGISTER_MODE: auto
+    command: develop
+    volumes:
+      - ./app:/opt/converter/app

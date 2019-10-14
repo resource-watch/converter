@@ -1,12 +1,14 @@
-test:
-  extends:
-    file: base.yml
-    service: base
-  container_name: converter-test
-  environment:
-    NODE_ENV: test
-    HOST_IP: 127.0.0.1
-    CT_URL: http://mymachine:9000
-    CT_REGISTER_MODE: auto
-    API_VERSION: v1
-  command: test
+version: "3"
+services:
+  test:
+    build: .
+    container_name: converter-test
+    environment:
+      PORT: 7658
+      NODE_ENV: test
+      HOST_IP: 127.0.0.1
+      CT_URL: http://127.0.0.1:9000
+      LOCAL_URL: http://127.0.0.1:7658
+      CT_REGISTER_MODE: auto
+      API_VERSION: v1
+    command: test
