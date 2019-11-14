@@ -22,6 +22,9 @@
     "javascript",
     "koa"
   ],
+  "engines": {
+    "node": "~12"
+  },
   "author": "https://github.com/vizzuality",
   "license": "MIT",
   "homepage": "https://github.com/gfw-api/converter#readme",
@@ -53,9 +56,22 @@
     "grunt-express-server": "^0.5.4",
     "grunt-mocha-test": "^0.13.3",
     "grunt-simple-nyc": "^3.0.0",
+    "husky": ">=1",
+    "lint-staged": ">=8",
     "load-grunt-tasks": "^5.1.0",
     "mocha": "^6.2.1",
     "nock": "^11.4.0",
     "nyc": "^14.1.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ]
   }
 }

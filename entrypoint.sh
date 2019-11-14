@@ -8,15 +8,15 @@ case "$1" in
         ;;
     startDev)
         echo "Running Start Dev"
-        exec npm start
+        exec yarn start
         ;;
     test)
         echo "Running Test"
-        exec npm test
+        exec yarn test
         ;;
     start)
         echo "Running Start"
-        exec npm start
+        exec yarn start
         ;;
     *)
         exec "$@"
