@@ -1,28 +1,14 @@
-'use strict';
-
 const logger = require('logger');
 const SQLService = require('services/sqlService');
-const geojsonToArcGIS = require('arcgis-to-geojson-utils').geojsonToArcGIS;
-const arcgisToGeoJSON = require('arcgis-to-geojson-utils').arcgisToGeoJSON;
+const { geojsonToArcGIS } = require('arcgis-to-geojson-utils');
+const { arcgisToGeoJSON } = require('arcgis-to-geojson-utils');
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
 const QueryNotValid = require('errors/queryNotValid');
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
-const aggrFunctionsRegex = /(count *\(|sum\(|min\(|max\(|avg\(|stddev\(|var\(){1}[A-Za-z0-9_]*/g;
-const OBTAIN_GEOJSON = /[.]*st_geomfromgeojson*\( *['|"]([^\)]*)['|"] *\)/g;
-const CONTAIN_INTERSEC = /[.]*([and | or]*st_intersects.*)\)/g;
-const obtainColAggrRegex = /\((.*?)\)/g;
 
-var JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
-
-var deserializer = function (obj) {
-    return function (callback) {
-        new JSONAPIDeserializer({
-            keyForAttribute: 'camelCase'
-        }).deserialize(obj, callback);
-    };
-};
+const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 
 class ConverterService {
 
@@ -37,9 +23,9 @@ class ConverterService {
         if (fs.outStatistics) {
             try {
 
-                let statistics = JSON.parse(fs.outStatistics);
+                const statistics = JSON.parse(fs.outStatistics);
                 if (statistics) {
-                    for (let i = 0, length = statistics.length; i < length; i++) {
+                    for (let i = 0, { length } = statistics; i < length; i++) {
                         if (result) {
                             result += ', ';
                         }
@@ -60,8 +46,8 @@ class ConverterService {
         return result;
     }
 
-    static* obtainWhere(params) {
-        let fs = params;
+    static async obtainWhere(params) {
+        const fs = params;
         let where = '';
         if (fs.where) {
             if (!where) {
@@ -77,14 +63,14 @@ class ConverterService {
             }
 
             logger.debug('fs.geometry', fs.geometry);
-            let esrigeojson = JSON.parse(fs.geometry.replace(/\\"/g, '"'));
+            const esrigeojson = JSON.parse(fs.geometry.replace(/\\"/g, '"'));
             let wkid = fs.inSR ? JSON.parse(fs.inSR.replace(/\\"/g, '"')) : null;
             wkid = wkid.wkid || 4326;
 
-            let geojson = arcgisToGeoJSON(esrigeojson);
+            const geojson = arcgisToGeoJSON(esrigeojson);
             where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.geometry || geojson)}'), ${wkid}))`;
         } else if (params.geostore) {
-            let geojson = yield ConverterService.obtainGeoStore(params.geostore);
+            const geojson = await ConverterService.obtainGeoStore(params.geostore);
             if (!where) {
                 where = 'WHERE ';
             } else {
@@ -103,21 +89,21 @@ class ConverterService {
         return where;
     }
 
-    static* fs2SQL(params) {
-        let fs = params;
+    static async fs2SQL(params) {
+        const fs = params;
         logger.info('Creating query from featureService', params);
-        let where = yield ConverterService.obtainWhere(params);
-        let sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
+        const where = await ConverterService.obtainWhere(params);
+        const sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
                 ${where}
-                ${fs.groupByFieldsForStatistics ? `GROUP BY ${fs.groupByFieldsForStatistics} ` : '' }
+                ${fs.groupByFieldsForStatistics ? `GROUP BY ${fs.groupByFieldsForStatistics} ` : ''}
                 ${fs.orderByFields ? `ORDER BY ${fs.orderByFields} ` : ''}
-                ${fs.resultRecordCount ? `LIMIT ${fs.resultRecordCount }` : ''}`.replace(/\s\s+/g, ' ').trim();
+                ${fs.resultRecordCount ? `LIMIT ${fs.resultRecordCount}` : ''}`.replace(/\s\s+/g, ' ').trim();
 
-        let parsed = new Sql2json(sql).toJSON();
+        const parsed = new Sql2json(sql).toJSON();
         if (!parsed) {
             return SQLService.generateError('Malformed query');
         }
-        let result = SQLService.checkSQL(parsed);
+        const result = SQLService.checkSQL(parsed);
 
         if (result && result.error) {
             return result;
@@ -130,7 +116,7 @@ class ConverterService {
 
     static obtainAggrFun(exp) {
         if (exp) {
-            for (let i = 0, length = aggrFunctions.length; i < length; i++) {
+            for (let i = 0, { length } = aggrFunctions; i < length; i++) {
                 if (exp.startsWith(aggrFunctions[i])) {
                     return aggrFunctions[i];
                 }
@@ -144,7 +130,7 @@ class ConverterService {
             geojson.rings = geojson.coordinates;
             delete geojson.coordinates;
         } else if (geojson.type === 'multipolygon') {
-            geojson.rings = geojson.coordinates[0];
+            [geojson.rings] = geojson.coordinates;
             delete geojson.coordinates;
         }
         geojson.type = 'polygon';
@@ -160,18 +146,20 @@ class ConverterService {
             const right = ConverterService.removeIntersect(node.right);
             if (!left) {
                 return node.right;
-            } else if (!right) {
+            }
+            if (!right) {
                 return node.left;
             }
         }
         return node;
     }
 
-    static findIntersect(node, finded, result) {
-        if (node && node.type === 'string' && node.value && finded) {
+    static findIntersect(node, found, result) {
+        if (node && node.type === 'string' && node.value && found) {
             try {
                 const geojson = JSON.parse(node.value);
                 if (!result) {
+                    // eslint-disable-next-line no-param-reassign
                     result = {};
                 }
                 result.geojson = geojson;
@@ -180,15 +168,17 @@ class ConverterService {
                 return result;
             }
         }
-        if (node && node.type === 'number' && node.value && finded) {
+        if (node && node.type === 'number' && node.value && found) {
             if (!result) {
+                // eslint-disable-next-line no-param-reassign
                 result = {};
             }
             result.wkid = node.value;
             return result;
         }
-        if (node && node.type === 'function' && (node.value.toLowerCase() === 'st_intersects' || finded)) {
-            for (let i = 0, length = node.arguments.length; i < length; i++) {
+        if (node && node.type === 'function' && (node.value.toLowerCase() === 'st_intersects' || found)) {
+            for (let i = 0, { length } = node.arguments; i < length; i++) {
+                // eslint-disable-next-line no-param-reassign
                 result = Object.assign(result || {}, ConverterService.findIntersect(node.arguments[i], true, result));
                 if (result && result.geojson && result.wkid) {
                     return result;
@@ -200,7 +190,8 @@ class ConverterService {
             const right = ConverterService.findIntersect(node.right);
             if (left) {
                 return left;
-            } else if (right) {
+            }
+            if (right) {
                 return right;
             }
         }
@@ -209,8 +200,8 @@ class ConverterService {
 
     static parseWhere(where) {
         logger.debug('Parsing where', where);
-        let geo = ConverterService.findIntersect(where);
-        let fs = {};
+        const geo = ConverterService.findIntersect(where);
+        const fs = {};
         if (geo) {
             fs.geometryType = 'esriGeometryPolygon';
             fs.spatialRel = 'esriSpatialRelIntersects';
@@ -218,7 +209,7 @@ class ConverterService {
                 wkid: geo.wkid
             });
             fs.geometry = JSON.stringify(geojsonToArcGIS(geo.geojson));
-            let pruneWhere = ConverterService.removeIntersect(where);
+            const pruneWhere = ConverterService.removeIntersect(where);
             if (pruneWhere) {
                 fs.where = Json2sql.parseWhere(pruneWhere);
             }
@@ -230,7 +221,7 @@ class ConverterService {
 
     static parseFunction(nodeFun) {
         const args = [];
-        for (let i = 0, length = nodeFun.arguments.length; i < length; i++) {
+        for (let i = 0, { length } = nodeFun.arguments; i < length; i++) {
             const node = nodeFun.arguments[i];
             switch (node.type) {
 
@@ -257,7 +248,7 @@ class ConverterService {
     static parseGroupBy(group) {
         if (group) {
             const result = [];
-            for (let i = 0, length = group.length; i < length; i++) {
+            for (let i = 0, { length } = group; i < length; i++) {
                 const node = group[i];
                 switch (node.type) {
 
@@ -283,8 +274,8 @@ class ConverterService {
 
         if (parsed.select && parsed.select.length > 0) {
             let outFields = '';
-            let outStatistics = [];
-            for (let i = 0, length = parsed.select.length; i < length; i++) {
+            const outStatistics = [];
+            for (let i = 0, { length } = parsed.select; i < length; i++) {
                 const node = parsed.select[i];
                 if (node.type === 'function') {
                     if (node.value.toLowerCase() === 'count' && parsed.select.length === 1) {
@@ -293,7 +284,7 @@ class ConverterService {
                         if (node.value.toLowerCase() === 'count' && node.arguments[0].value === '*') {
                             throw new QueryNotValid(400, 'Invalid query. ArcGis does not support count(*) with more columns');
                         }
-                        let obj = {
+                        const obj = {
                             statisticType: node.value,
                             onStatisticField: node.arguments[0].value
                         };
@@ -306,7 +297,7 @@ class ConverterService {
                 } else if (node.type === 'distinct') {
                     fs.returnDistinctValues = true;
                     fs.returnGeometry = false;
-                    for (let j = 0, length = node.arguments.length; j < length; j++) {
+                    for (let j = 0, { length: argumentsLength } = node.arguments; j < argumentsLength; j++) {
                         const argument = node.arguments[j];
                         if (outFields !== '') {
                             outFields += ',';
@@ -331,12 +322,12 @@ class ConverterService {
             fs.tableName = parsed.from;
         }
         if (parsed.where) {
-            fs = Object.assign({}, fs, ConverterService.parseWhere(parsed.where));
+            fs = { ...fs, ...ConverterService.parseWhere(parsed.where) };
         } else {
-            fs = Object.assign({}, fs, { where: '1=1' });
+            fs = { ...fs, where: '1=1' };
         }
         if (parsed.group && parsed.group.length > 0) {
-            let groupByFieldsForStatistics = ConverterService.parseGroupBy(parsed.group);
+            const groupByFieldsForStatistics = ConverterService.parseGroupBy(parsed.group);
             fs.groupByFieldsForStatistics = groupByFieldsForStatistics;
         }
 
@@ -345,7 +336,7 @@ class ConverterService {
             for (let i = 0, { length } = parsed.orderBy; i < length; i++) {
                 orderByFields += parsed.orderBy[i].value;
                 if (parsed.orderBy[i].direction) {
-                    orderByFields += ' ' + parsed.orderBy[i].direction;
+                    orderByFields += ` ${parsed.orderBy[i].direction}`;
                 }
                 if (i < length - 1) {
                     orderByFields += ',';
@@ -369,16 +360,18 @@ class ConverterService {
         return fs;
     }
 
-    static* obtainGeoStore(id) {
+    static async obtainGeoStore(id) {
         logger.info('Obtaining geostore with id', id);
         try {
-            let result = yield require('ct-register-microservice-node').requestToMicroservice({
+            const result = await require('ct-register-microservice-node').requestToMicroservice({
                 uri: encodeURI(`/geostore/${id}`),
                 method: 'GET',
                 json: true
             });
 
-            let geostore = yield deserializer(result);
+            const geostore = await new JSONAPIDeserializer({
+                keyForAttribute: 'camelCase'
+            }).deserialize(result);
             if (geostore) {
                 return geostore.geojson;
             }
@@ -388,6 +381,8 @@ class ConverterService {
             }
             throw new Error('Error obtaining geostore');
         }
+
+        return null;
     }
 
     static checkGeojson(geojson) {
@@ -399,7 +394,8 @@ class ConverterService {
                     geometry: geojson
                 }]
             };
-        } else if (geojson.type.toLowerCase() === 'feature') {
+        }
+        if (geojson.type.toLowerCase() === 'feature') {
             return {
                 type: 'FeatureCollection',
                 features: [geojson]
@@ -408,10 +404,10 @@ class ConverterService {
         return geojson;
     }
 
-    static* sql2FS(params) {
-        let sql = params.sql.trim();
+    static async sql2FS(params) {
+        const sql = params.sql.trim();
         logger.info('Creating featureservice from sql', sql);
-        let parsed = new Sql2json(sql).toJSON();
+        const parsed = new Sql2json(sql).toJSON();
         if (!parsed) {
             return SQLService.generateError('Malformed query');
         }
@@ -424,7 +420,7 @@ class ConverterService {
             parsed.geojson = geojson;
         }
         if (params.geostore) {
-            let geojson = yield ConverterService.obtainGeoStore(params.geostore);
+            const geojson = await ConverterService.obtainGeoStore(params.geostore);
             parsed.geojson = geojson;
         }
         result = ConverterService.obtainFSFromAST(parsed);
@@ -436,6 +432,7 @@ class ConverterService {
             parsed
         };
     }
+
 }
 
 module.exports = ConverterService;

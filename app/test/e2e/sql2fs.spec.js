@@ -27,7 +27,6 @@ describe('sql2FS conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `?outFields=*&tableName=${datasetId}&where=1=1&orderByFields=y`,
                     fs: {
@@ -55,7 +54,6 @@ describe('sql2FS conversion tests', () => {
                         ]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -63,12 +61,12 @@ describe('sql2FS conversion tests', () => {
             .post(`/api/v1/convert/sql2FS`)
             .send({
                 sql: query,
-                loggedUser: {id : 'microservice'}
+                loggedUser: { id: 'microservice' }
 
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
     it('Order by field and DESC should be reflected on generated request (happy case)', async () => {
@@ -78,7 +76,6 @@ describe('sql2FS conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `?outFields=*&tableName=${datasetId}&where=1=1&orderByFields=y desc`,
                     fs: {
@@ -106,7 +103,6 @@ describe('sql2FS conversion tests', () => {
                         ]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -114,12 +110,12 @@ describe('sql2FS conversion tests', () => {
             .post(`/api/v1/convert/sql2FS`)
             .send({
                 sql: query,
-                loggedUser: {id : 'microservice'}
+                loggedUser: { id: 'microservice' }
 
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
     it('Order by field and ASC should be reflected on generated request (happy case)', async () => {
@@ -129,7 +125,6 @@ describe('sql2FS conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `?outFields=*&tableName=${datasetId}&where=1=1&orderByFields=y asc`,
                     fs: {
@@ -157,7 +152,6 @@ describe('sql2FS conversion tests', () => {
                         ]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -165,14 +159,13 @@ describe('sql2FS conversion tests', () => {
             .post(`/api/v1/convert/sql2FS`)
             .send({
                 sql: query,
-                loggedUser: {id : 'microservice'}
+                loggedUser: { id: 'microservice' }
 
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
-
 
 
     it('Order by multiple fields with ASC|DESC|none should be reflected on generated request (happy case)', async () => {
@@ -182,7 +175,6 @@ describe('sql2FS conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `?outFields=*&tableName=${datasetId}&where=1=1&orderByFields=x,y asc,z desc`,
                     fs: {
@@ -222,7 +214,6 @@ describe('sql2FS conversion tests', () => {
                         ]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -230,12 +221,12 @@ describe('sql2FS conversion tests', () => {
             .post(`/api/v1/convert/sql2FS`)
             .send({
                 sql: query,
-                loggedUser: {id : 'microservice'}
+                loggedUser: { id: 'microservice' }
 
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
 

@@ -1,9 +1,9 @@
-/* eslint-disable no-unused-vars,no-undef */
+/* eslint-disable max-len,no-useless-escape */
 const nock = require('nock');
 const chai = require('chai');
 const { getTestServer } = require('./test-server');
 
-const should = chai.should();
+chai.should();
 
 const requester = getTestServer();
 
@@ -27,7 +27,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query,
                     jsonSql: {
@@ -41,7 +40,6 @@ describe('sql2SQL conversion tests', () => {
                         from: datasetId
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -52,7 +50,7 @@ describe('sql2SQL conversion tests', () => {
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
     it('Select all query with grouping (select * from dataset group by field) conversion should be successful', async () => {
@@ -63,7 +61,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query,
                     jsonSql: {
@@ -77,13 +74,12 @@ describe('sql2SQL conversion tests', () => {
                         from: datasetId,
                         group: [
                             {
-                                type: "literal",
+                                type: 'literal',
                                 value: groupByFieldName
                             }
                         ]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -94,7 +90,7 @@ describe('sql2SQL conversion tests', () => {
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
     it('Select specific fields query (select fieldA, fieldB from dataset) should be successful', async () => {
@@ -106,26 +102,24 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT ${fieldAName}, ${fieldBName} FROM ${datasetId}`,
                     jsonSql: {
                         select: [
                             {
                                 alias: null,
-                                type: "literal",
+                                type: 'literal',
                                 value: fieldAName
                             },
                             {
                                 alias: null,
-                                type: "literal",
+                                type: 'literal',
                                 value: fieldBName
                             }
                         ],
                         from: datasetId
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -136,7 +130,7 @@ describe('sql2SQL conversion tests', () => {
             });
 
         response.status.should.equal(200);
-        response.body.should.deep.equal(reply)
+        response.body.should.deep.equal(reply);
     });
 
     it('Select all query with function (select function(field) from dataset) conversion should be successful', async () => {
@@ -148,7 +142,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId}`,
                     jsonSql: {
@@ -168,7 +161,6 @@ describe('sql2SQL conversion tests', () => {
                         from: datasetId
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -191,7 +183,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}(${fieldName})`,
                     jsonSql: {
@@ -225,7 +216,6 @@ describe('sql2SQL conversion tests', () => {
 
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -248,7 +238,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}('name'="${fieldName}")`,
                     jsonSql: {
@@ -283,7 +272,6 @@ describe('sql2SQL conversion tests', () => {
 
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -306,7 +294,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT ${functionName}(${fieldName}) FROM ${datasetId} GROUP BY ${functionName}('name'="${fieldName}", 'format'='yyyy-MM-dd','2014-08-18','2014-08-17','now-8d','now-7d','now-6d','now')`,
                     jsonSql: {
@@ -336,33 +323,33 @@ describe('sql2SQL conversion tests', () => {
                                         type: 'literal'
                                     },
                                     {
-                                        name: "format",
-                                        type: "string",
-                                        value: "yyyy-MM-dd"
+                                        name: 'format',
+                                        type: 'string',
+                                        value: 'yyyy-MM-dd'
                                     },
                                     {
-                                        type: "string",
-                                        value: "2014-08-18"
+                                        type: 'string',
+                                        value: '2014-08-18'
                                     },
                                     {
-                                        type: "string",
-                                        value: "2014-08-17"
+                                        type: 'string',
+                                        value: '2014-08-17'
                                     },
                                     {
-                                        type: "string",
-                                        value: "now-8d"
+                                        type: 'string',
+                                        value: 'now-8d'
                                     },
                                     {
-                                        type: "string",
-                                        value: "now-7d"
+                                        type: 'string',
+                                        value: 'now-7d'
                                     },
                                     {
-                                        type: "string",
-                                        value: "now-6d"
+                                        type: 'string',
+                                        value: 'now-6d'
                                     },
                                     {
-                                        type: "string",
-                                        value: "now"
+                                        type: 'string',
+                                        value: 'now'
                                     }
                                 ]
                             }
@@ -370,7 +357,6 @@ describe('sql2SQL conversion tests', () => {
 
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -392,7 +378,6 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
                     query: `SELECT DISTINCT ${fieldName} FROM ${datasetId} WHERE ${fieldName} IS NOT NULL GROUP BY ${fieldName} ORDER BY ${fieldName}`,
                     jsonSql: {
@@ -425,19 +410,18 @@ describe('sql2SQL conversion tests', () => {
                         ],
                         where: [{
                             left: [{
-                                type: "literal",
-                                value: "foo"
+                                type: 'literal',
+                                value: 'foo'
                             }],
                             right: [{
-                                type: "literal",
-                                value: "NULL"
+                                type: 'literal',
+                                value: 'NULL'
                             }],
-                            type: "operator",
-                            value: "IS NOT"
+                            type: 'operator',
+                            value: 'IS NOT'
                         }]
                     }
                 },
-                relationships: {}
             }
         };
 
@@ -460,9 +444,8 @@ describe('sql2SQL conversion tests', () => {
         const reply = {
             data: {
                 type: 'result',
-                id: 'undefined',
                 attributes: {
-                    query : `${query} WHERE ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Polygon\",\"coordinates\":[]}'), 4326), the_geom)`,
+                    query: `${query} WHERE ST_INTERSECTS(ST_SetSRID(ST_GeomFromGeoJSON('{\"type\":\"Polygon\",\"coordinates\":[]}'), 4326), the_geom)`,
                     jsonSql: {
                         select: [
                             {
@@ -478,56 +461,57 @@ describe('sql2SQL conversion tests', () => {
                                         {
                                             arguments: [
                                                 {
-                                                    type: "string",
-                                                    value: "{\"type\":\"Polygon\",\"coordinates\":[]}"
+                                                    type: 'string',
+                                                    value: '{"type":"Polygon","coordinates":[]}'
                                                 }
                                             ],
-                                            type: "function",
-                                            value: "ST_GeomFromGeoJSON"
+                                            type: 'function',
+                                            value: 'ST_GeomFromGeoJSON'
                                         },
                                         {
-                                            type: "number",
+                                            type: 'number',
                                             value: 4326
                                         }
                                     ],
-                                    type: "function",
-                                    value: "ST_SetSRID"
+                                    type: 'function',
+                                    value: 'ST_SetSRID'
                                 },
                                 {
-                                    type: "literal",
-                                    value: "the_geom"
+                                    type: 'literal',
+                                    value: 'the_geom'
                                 }
                             ],
-                            type: "function",
-                            value: "ST_INTERSECTS"
+                            type: 'function',
+                            value: 'ST_INTERSECTS'
                         },
                         from: datasetId
                     }
-                },
-                relationships: {}
+                }
             }
         };
 
         nock(process.env.CT_URL)
             .get(`/v1/geostore/${geostore}`)
             .reply(200, {
-                "data": {
-                    "type": "geoStore",
-                    "id": geostore,
-                    "attributes": {
-                        "geojson": {
-                            "features": [{
-                                "properties": null,
-                                "type": "Feature",
-                                "geometry": { "type": "Polygon", "coordinates": [] }
-                            }], "crs": {}, "type": "FeatureCollection"
+                data: {
+                    type: 'geoStore',
+                    id: geostore,
+                    attributes: {
+                        geojson: {
+                            features: [{
+                                properties: null,
+                                type: 'Feature',
+                                geometry: { type: 'Polygon', coordinates: [] }
+                            }],
+                            crs: {},
+                            type: 'FeatureCollection'
                         },
-                        "hash": geostore,
-                        "provider": {},
-                        "areaHa": 0,
-                        "bbox": [null, null, null, null],
-                        "lock": false,
-                        "info": { "use": {} }
+                        hash: geostore,
+                        provider: {},
+                        areaHa: 0,
+                        bbox: [null, null, null, null],
+                        lock: false,
+                        info: { use: {} }
                     }
                 }
             });
