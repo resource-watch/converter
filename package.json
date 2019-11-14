@@ -39,6 +39,7 @@
     "koa-logger": "^3.2.1",
     "koa-mount": "^4.0.0",
     "koa-router": "^7.4.0",
+    "koa-simple-healthcheck": "^0.0.1",
     "simple-sql-parser": "git+https://github.com/rrequero/simpleSqlParser.git#between-support",
     "sql2json": "2.0.6"
   },
