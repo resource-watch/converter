@@ -54,5 +54,22 @@ spec:
                   key: API_VERSION
         ports:
           - containerPort: 4100
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /healthcheck
+            port: 4100
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 15
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /healthcheck
+            port: 4100
+          failureThreshold: 3
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 15
 
       restartPolicy: Always
