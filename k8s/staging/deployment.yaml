@@ -2,8 +2,8 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    name: {name}
-  name: {name}
+    name: converter
+  name: converter
 spec:
   revisionHistoryLimit: 0
   template:
@@ -11,11 +11,11 @@ spec:
       annotations:
         chaos.alpha.kubernetes.io/enabled: "true"
       labels:
-        name: {name}
+        name: converter
     spec:
       containers:
-      - name: {name}
-        image: vizzuality/{name}
+      - name: converter
+        image: vizzuality/converter
         imagePullPolicy: Always
         resources:
           requests:
@@ -34,7 +34,7 @@ spec:
           - name: NODE_PATH
             value: app/src
           - name: LOCAL_URL
-            value: http://{name}.default.svc.cluster.local:4100
+            value: http://converter.default.svc.cluster.local:4100
           - name: CT_URL
             valueFrom:
                 secretKeyRef:
