@@ -10,7 +10,7 @@ const requester = getTestServer();
 nock.disableNetConnect();
 nock.enableNetConnect(`${process.env.HOST_IP}:${process.env.PORT}`);
 
-describe('sql2FS conversion tests - excludeGeometries parameter', () => {
+describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
 
     before(async () => {
         if (process.env.NODE_ENV !== 'test') {
@@ -50,8 +50,8 @@ describe('sql2FS conversion tests - excludeGeometries parameter', () => {
         };
 
         const response = await requester
-            .post(`/api/v1/convert/sql2FS`)
-            .send({
+            .get(`/api/v1/convert/sql2FS`)
+            .query({
                 sql: query,
                 loggedUser: { id: 'microservice' }
 
@@ -91,8 +91,8 @@ describe('sql2FS conversion tests - excludeGeometries parameter', () => {
         };
 
         const response = await requester
-            .post(`/api/v1/convert/sql2FS`)
-            .send({
+            .get(`/api/v1/convert/sql2FS`)
+            .query({
                 sql: query,
                 excludeGeometries: false,
                 loggedUser: { id: 'microservice' }
@@ -133,8 +133,8 @@ describe('sql2FS conversion tests - excludeGeometries parameter', () => {
         };
 
         const response = await requester
-            .post(`/api/v1/convert/sql2FS`)
-            .send({
+            .get(`/api/v1/convert/sql2FS`)
+            .query({
                 sql: query,
                 excludeGeometries: true,
                 loggedUser: { id: 'microservice' }

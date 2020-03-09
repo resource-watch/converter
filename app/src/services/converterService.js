@@ -424,7 +424,7 @@ class ConverterService {
             parsed.geojson = geojson;
         }
         result = ConverterService.obtainFSFromAST(parsed);
-        if (Object.prototype.hasOwnProperty.call(params, 'excludeGeometries') && params.excludeGeometries === true) {
+        if (Object.prototype.hasOwnProperty.call(params, 'excludeGeometries') && (params.excludeGeometries === true || params.excludeGeometries === 'true')) {
             result.returnGeometry = false;
         }
         if (result && result.error) {
