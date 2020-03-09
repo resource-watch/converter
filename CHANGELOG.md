@@ -1,3 +1,6 @@
+#03/03/2020
+- Add `excludeGeometries` optional param to `sql2FS` endpoint, to support opting out of loading geometries.
+
 #14/11/2019
 - Set CPU and memory quotas on k8s config
 - Added liveliness and readiness probes to k8s config
