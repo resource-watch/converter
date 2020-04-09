@@ -3,7 +3,7 @@ const nock = require('nock');
 const chai = require('chai');
 const { getTestServer } = require('./test-server');
 
-const should = chai.should();
+chai.should();
 
 const requester = getTestServer();
 
@@ -54,7 +54,6 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
             .query({
                 sql: query,
                 loggedUser: { id: 'microservice' }
-
             });
 
         response.status.should.equal(200);
