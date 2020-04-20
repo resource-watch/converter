@@ -8,7 +8,7 @@ const GeoStoreNotFound = require('errors/geoStoreNotFound');
 class SQLService {
 
     static generateError(message) {
-        logger.debug(message);
+        logger.warn(`Error found: ${message}`);
         return {
             error: true,
             message: `${message}`
@@ -28,8 +28,9 @@ class SQLService {
     }
 
     static checkSQL(parsed) {
-        logger.info('Checking sql ');
+        logger.info('Checking sql...');
         if (parsed && ((parsed.select && parsed.select.length > 0) || parsed.delete) && parsed.from) {
+            logger.info('Valid sql!');
             return {
                 error: false
             };
@@ -63,7 +64,7 @@ class SQLService {
                 return geostore;
             }
         } catch (err) {
-            logger.error('Error obtaining geostore', err);
+            logger.warn('Error obtaining geostore', err);
             if (err && err.statusCode === 404) {
                 throw new GeoStoreNotFound(404, 'Geostore not found');
             }
@@ -175,14 +176,19 @@ class SQLService {
                 parsed.where = intersect;
             }
         }
-        logger.debug('sql converted!');
+        logger.debug('Sql converted successfully, checking for validity');
 
         const result = SQLService.checkSQL(parsed);
         if (!result || result.error) {
+            logger.warn(`Error checking sql for parsed query: ${parsed}`);
             return result;
         }
+        const jsonToSql = Json2sql.toSQL(parsed);
+
+        logger.info(`Returning converted sql: ${jsonToSql}`);
+
         return {
-            sql: Json2sql.toSQL(parsed),
+            sql: jsonToSql,
             parsed
         };
     }
