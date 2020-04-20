@@ -99,7 +99,7 @@ class ConvertRouter {
         try {
             result = await SQLService.sql2SQL(params, ctx.query.raster === 'true', ctx.query.experimental);
         } catch (err) {
-            logger.error('Error converting query using sql2SQL service');
+            logger.error(`Error converting query using sql2SQL service: ${err}`);
             err.status = 400;
             throw err;
         }
