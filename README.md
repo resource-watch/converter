@@ -18,6 +18,10 @@ Execution using Docker requires:
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
+Dependencies on other Microservices:
+
+- [Geostore](https://github.com/gfw-api/gfw-geostore-api)
+
 ## Getting started
 
 Start by cloning the repository from github to your execution environment
