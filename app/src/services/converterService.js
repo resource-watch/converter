@@ -5,6 +5,7 @@ const { arcgisToGeoJSON } = require('arcgis-to-geojson-utils');
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
 const QueryNotValid = require('errors/queryNotValid');
+const { RWAPIMicroservice } = require('rw-api-microservice-node');
 
 const aggrFunctions = ['count', 'sum', 'min', 'max', 'avg', 'stddev', 'var'];
 
@@ -363,7 +364,7 @@ class ConverterService {
     static async obtainGeoStore(id) {
         logger.info('Obtaining geostore with id', id);
         try {
-            const result = await require('ct-register-microservice-node').requestToMicroservice({
+            const result = await RWAPIMicroservice.requestToMicroservice({
                 uri: encodeURI(`/geostore/${id}`),
                 method: 'GET',
                 json: true

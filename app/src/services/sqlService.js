@@ -4,6 +4,7 @@ const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 const Sql2json = require('sql2json').sql2json;
 const Json2sql = require('sql2json').json2sql;
 const GeoStoreNotFound = require('errors/geoStoreNotFound');
+const { RWAPIMicroservice } = require('rw-api-microservice-node');
 
 class SQLService {
 
@@ -51,7 +52,7 @@ class SQLService {
 
     static async obtainGeoStore(id) {
         try {
-            const result = await require('ct-register-microservice-node').requestToMicroservice({
+            const result = await RWAPIMicroservice.requestToMicroservice({
                 uri: encodeURI(`/geostore/${id}`),
                 method: 'GET',
                 json: true
