@@ -32,7 +32,7 @@
     "arcgis-to-geojson-utils": "1.0.1",
     "bunyan": "1.7.1",
     "config": "^3.2.4",
-    "ct-register-microservice-node": "^2.1.7",
+    "rw-api-microservice-node": "^2.0.4",
     "jsonapi-serializer": "^3.6.5",
     "koa": "2.11.0",
     "koa-bodyparser": "^4.2.1",
