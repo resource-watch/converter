@@ -12,4 +12,5 @@ services:
       CT_REGISTER_MODE: auto
       API_VERSION: v1
       CT_TOKEN: cttoken
+      FASTLY_ENABLED: "false"
     command: test
