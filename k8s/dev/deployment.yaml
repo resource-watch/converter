@@ -61,7 +61,7 @@ spec:
                 secretKeyRef:
                   key: API_VERSION
                   name: mssecrets
-          image: vizzuality/converter
+          image: gfwdockerhub/converter
           imagePullPolicy: Always
           livenessProbe:
             failureThreshold: 3
