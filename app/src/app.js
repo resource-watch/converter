@@ -10,10 +10,7 @@ const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 
 const app = new Koa();
 
-// if environment is dev then load koa-logger
-if (process.env.NODE_ENV === 'dev') {
-    app.use(koaLogger());
-}
+app.use(koaLogger());
 
 app.use(bodyParser({
     jsonLimit: '50mb'
@@ -41,13 +38,9 @@ app.use(async (ctx, next) => {
 });
 
 app.use(RWAPIMicroservice.bootstrap({
-    name: config.get('service.name'),
-    info: require('../microservice/register.json'),
-    swagger: require('../microservice/public-swagger.json'),
     logger,
-    baseURL: process.env.CT_URL,
-    url: process.env.LOCAL_URL,
-    token: process.env.CT_TOKEN,
+    gatewayURL: process.env.GATEWAY_URL,
+    microserviceToken: process.env.MICROSERVICE_TOKEN,
     fastlyEnabled: process.env.FASTLY_ENABLED,
     fastlyServiceId: process.env.FASTLY_SERVICEID,
     fastlyAPIKey: process.env.FASTLY_APIKEY
@@ -58,18 +51,9 @@ loader.loadRoutes(app);
 
 // get port of environment, if not exist obtain of the config.
 // In production environment, the port must be declared in environment variable
-const port = process.env.PORT || config.get('service.port');
+const port = config.get('service.port');
 
-const server = app.listen(port, () => {
-    if (process.env.CT_REGISTER_MODE === 'auto') {
-        RWAPIMicroservice.register().then(() => {
-            logger.info('CT registration process started');
-        }, (error) => {
-            logger.error(error);
-            process.exit(1);
-        });
-    }
-});
+const server = app.listen(port);
 
 logger.info(`Server started in port:${port}`);
 

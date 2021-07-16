@@ -39,27 +39,15 @@ spec:
               value: prod
             - name: NODE_PATH
               value: app/src
-            - name: LOCAL_URL
-              value: http://converter.default.svc.cluster.local:4100
-            - name: CT_URL
+            - name: GATEWAY_URL
               valueFrom:
                 secretKeyRef:
-                  key: CT_URL
+                  key: GATEWAY_URL
                   name: mssecrets
-            - name: CT_TOKEN
+            - name: MICROSERVICE_TOKEN
               valueFrom:
                 secretKeyRef:
-                  key: CT_TOKEN
-                  name: mssecrets
-            - name: CT_REGISTER_MODE
-              valueFrom:
-                secretKeyRef:
-                  key: CT_REGISTER_MODE
-                  name: mssecrets
-            - name: API_VERSION
-              valueFrom:
-                secretKeyRef:
-                  key: API_VERSION
+                  key: MICROSERVICE_TOKEN
                   name: mssecrets
             - name: FASTLY_ENABLED
               valueFrom:

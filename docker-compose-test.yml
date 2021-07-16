@@ -7,10 +7,7 @@ services:
       PORT: 7658
       NODE_ENV: test
       HOST_IP: 127.0.0.1
-      CT_URL: http://127.0.0.1:9000
-      LOCAL_URL: http://127.0.0.1:7658
-      CT_REGISTER_MODE: auto
-      API_VERSION: v1
-      CT_TOKEN: cttoken
+      GATEWAY_URL: http://127.0.0.1:9000
+      MICROSERVICE_TOKEN: cttoken
       FASTLY_ENABLED: "false"
     command: test

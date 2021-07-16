@@ -365,7 +365,7 @@ class ConverterService {
         logger.info('Obtaining geostore with id', id);
         try {
             const result = await RWAPIMicroservice.requestToMicroservice({
-                uri: encodeURI(`/geostore/${id}`),
+                uri: encodeURI(`/v1/geostore/${id}`),
                 method: 'GET',
                 json: true
             });

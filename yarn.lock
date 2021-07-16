@@ -3688,13 +3688,6 @@ parseurl@^1.3.2:
   resolved "https://registry.yarnpkg.com/parseurl/-/parseurl-1.3.3.tgz#9da19e7bee8d12dff0513ed5b76957793bc2e8d4"
   integrity sha512-CiyeOxFT/JZyN5m0z9PfXw4SCBJ6Sygz1Dpl0wqjlhDEGGBP1GnsUVEL0p63hoG1fcj3fHynXi9NYO4nWOL+qQ==
 
-parsimmon@0.7.0:
-  version "0.7.0"
-  resolved "https://registry.yarnpkg.com/parsimmon/-/parsimmon-0.7.0.tgz#652fc7cbade73c5edb42a266ec556c906d82c9fb"
-  integrity sha1-ZS/Hy63nPF7bQqJm7FVskG2Cyfs=
-  dependencies:
-    pjs "5.x"
-
 pascalcase@^0.1.1:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/pascalcase/-/pascalcase-0.1.1.tgz#b363e55e8006ca6fe21784d2db22bd15d7917f14"
@@ -3797,11 +3790,6 @@ pify@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/pify/-/pify-4.0.1.tgz#4b2cd25c50d598735c50292224fd8c6df41e3231"
   integrity sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==
-
-pjs@5.x:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/pjs/-/pjs-5.1.2.tgz#856be7e0f3276604a055c52479ec7437c8a9255f"
-  integrity sha512-aoPrjtnYOknat/wiO5hyCkub7LymxSY1BN8gIsW49PfbdPyQiaU+UOo9DfSEhhl48cWLd28IwpERutBveLdQLA==
 
 pkg-dir@^2.0.0:
   version "2.0.0"
@@ -4167,10 +4155,10 @@ run-parallel@^1.1.9:
   resolved "https://registry.yarnpkg.com/run-parallel/-/run-parallel-1.1.9.tgz#c9dd3a7cf9f4b2c4b6244e173a6ed866e61dd679"
   integrity sha512-DEqnSRTDw/Tc3FXf49zedI638Z9onwUotBMiUFKmrO2sdFKIbXamXGQ3Axd4qgphxKB4kw/qP1w5kTxnfU1B9Q==
 
-rw-api-microservice-node@^3.4.1:
-  version "3.4.1"
-  resolved "https://registry.yarnpkg.com/rw-api-microservice-node/-/rw-api-microservice-node-3.4.1.tgz#01b2876d2b2acc13aaf01d630784e10b7410e186"
-  integrity sha512-blxLH1IXYudV+fMzuXFDPqkQyfqgWg2XDhjpDwRBdxW6PRW8ztOh7IKhVHov/RWeonrVQI6OzLnYEWsv3CBw0Q==
+rw-api-microservice-node@^4.0.2:
+  version "4.0.2"
+  resolved "https://registry.yarnpkg.com/rw-api-microservice-node/-/rw-api-microservice-node-4.0.2.tgz#0b373da8edc28e734b67c3ab473f4aa619a559ea"
+  integrity sha512-R0zF3owYU1yOanaMICcLk8TxJeD6fvMMsHwxD5ut3fw83RjU8gcVdHlK6XtsdEyN5CD254ng+HBw6Oua0+oq5g==
   dependencies:
     "@koa/cors" "^3.1.0"
     axios "^0.21.1"
@@ -4296,12 +4284,6 @@ simple-cli@^5.0.3:
     key-list "^0.1.4"
     lodash "^4.17.15"
     opted "^1.0.0"
-
-"simple-sql-parser@git+https://github.com/rrequero/simpleSqlParser.git#between-support":
-  version "2.0.0-alpha.1"
-  resolved "git+https://github.com/rrequero/simpleSqlParser.git#2a195b887aaef629d39644662c37978273b5fa1e"
-  dependencies:
-    parsimmon "0.7.0"
 
 slash@^3.0.0:
   version "3.0.0"

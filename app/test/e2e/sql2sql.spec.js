@@ -490,7 +490,7 @@ describe('sql2SQL conversion tests', () => {
             }
         };
 
-        nock(process.env.CT_URL)
+        nock(process.env.GATEWAY_URL)
             .get(`/v1/geostore/${geostore}`)
             .reply(200, {
                 data: {

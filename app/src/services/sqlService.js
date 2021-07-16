@@ -1,4 +1,3 @@
-const simpleSqlParser = require('simple-sql-parser');
 const logger = require('logger');
 const JSONAPIDeserializer = require('jsonapi-serializer').Deserializer;
 const Sql2json = require('sql2json').sql2json;
@@ -39,21 +38,10 @@ class SQLService {
         return SQLService.generateError('Malformed query');
     }
 
-    static obtainASTFromSQL(sql) {
-        const ast = simpleSqlParser.sql2ast(sql);
-        if (!ast.status) {
-            return SQLService.generateError('Malformed query');
-        }
-        return {
-            error: false,
-            ast: ast.value
-        };
-    }
-
     static async obtainGeoStore(id) {
         try {
             const result = await RWAPIMicroservice.requestToMicroservice({
-                uri: encodeURI(`/geostore/${id}`),
+                uri: encodeURI(`/v1/geostore/${id}`),
                 method: 'GET',
                 json: true
             });

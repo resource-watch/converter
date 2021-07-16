@@ -5,11 +5,9 @@ services:
     container_name: converter-develop
     environment:
       NODE_ENV: dev
-      CT_URL: http://mymachine:9000
-      LOCAL_URL: http://mymachine:4100
+      GATEWAY_URL: http://mymachine:9000
       PORT: 4100
-      API_VERSION: v1
-      CT_REGISTER_MODE: auto
+      FASTLY_ENABLED: "false"
     command: develop
     volumes:
       - ./app:/opt/converter/app
