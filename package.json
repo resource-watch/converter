@@ -23,7 +23,7 @@
     "koa"
   ],
   "engines": {
-    "node": "~12"
+    "node": "~16"
   },
   "author": "https://github.com/vizzuality",
   "license": "MIT",
