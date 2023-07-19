@@ -1,5 +1,5 @@
 const nock = require('nock');
-const { getTestServer } = require('./test-server');
+const { getTestServer } = require('./utils/test-server');
 
 let requester;
 

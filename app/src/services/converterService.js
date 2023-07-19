@@ -47,7 +47,7 @@ class ConverterService {
         return result;
     }
 
-    static async obtainWhere(params) {
+    static async obtainWhere(params, apiKey) {
         const fs = params;
         let where = '';
         if (fs.where) {
@@ -71,7 +71,7 @@ class ConverterService {
             const geojson = arcgisToGeoJSON(esrigeojson);
             where += `ST_INTERSECTS(the_geom, ST_SETSRID(ST_GeomFromGeoJSON('${JSON.stringify(geojson.geometry || geojson)}'), ${wkid}))`;
         } else if (params.geostore) {
-            const geojson = await ConverterService.obtainGeoStore(params.geostore);
+            const geojson = await ConverterService.obtainGeoStore(params.geostore, apiKey);
             if (!where) {
                 where = 'WHERE ';
             } else {
@@ -90,10 +90,10 @@ class ConverterService {
         return where;
     }
 
-    static async fs2SQL(params) {
+    static async fs2SQL(params, apiKey) {
         const fs = params;
         logger.info('Creating query from featureService', params);
-        const where = await ConverterService.obtainWhere(params);
+        const where = await ConverterService.obtainWhere(params, apiKey);
         const sql = `SELECT ${ConverterService.obtainSelect(fs)} FROM ${params.tableName}
                 ${where}
                 ${fs.groupByFieldsForStatistics ? `GROUP BY ${fs.groupByFieldsForStatistics} ` : ''}
@@ -361,13 +361,16 @@ class ConverterService {
         return fs;
     }
 
-    static async obtainGeoStore(id) {
+    static async obtainGeoStore(id, apiKey) {
         logger.info('Obtaining geostore with id', id);
         try {
             const result = await RWAPIMicroservice.requestToMicroservice({
                 uri: encodeURI(`/v1/geostore/${id}`),
                 method: 'GET',
-                json: true
+                json: true,
+                headers: {
+                    'x-api-key': apiKey,
+                }
             });
 
             const geostore = await new JSONAPIDeserializer({
@@ -405,7 +408,7 @@ class ConverterService {
         return geojson;
     }
 
-    static async sql2FS(params) {
+    static async sql2FS(params, apiKey) {
         const sql = params.sql.trim();
         logger.info('Creating featureservice from sql', sql);
         const parsed = new Sql2json(sql).toJSON();
@@ -421,7 +424,7 @@ class ConverterService {
             parsed.geojson = geojson;
         }
         if (params.geostore) {
-            const geojson = await ConverterService.obtainGeoStore(params.geostore);
+            const geojson = await ConverterService.obtainGeoStore(params.geostore, apiKey);
             parsed.geojson = geojson;
         }
         result = ConverterService.obtainFSFromAST(parsed);

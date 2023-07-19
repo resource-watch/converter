@@ -1,11 +1,12 @@
 /* eslint-disable max-len,no-useless-escape */
 const nock = require('nock');
 const chai = require('chai');
-const { getTestServer } = require('./test-server');
+const { getTestServer } = require('./utils/test-server');
+const { mockValidateRequestWithApiKey } = require('./utils/helpers');
 
 chai.should();
 
-const requester = getTestServer();
+let requester;
 
 nock.disableNetConnect();
 nock.enableNetConnect(`${process.env.HOST_IP}:${process.env.PORT}`);
@@ -17,10 +18,11 @@ describe('sql2SQL conversion tests', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
-        nock.cleanAll();
+        requester = await getTestServer();
     });
 
     it('Basic select all query (select * from dataset) conversion should be successful (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId}`;
 
@@ -45,6 +47,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -54,6 +57,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select all query with grouping (select * from dataset group by field) conversion should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const groupByFieldName = 'foo';
         const query = `SELECT * FROM ${datasetId} GROUP BY ${groupByFieldName}`;
@@ -85,6 +89,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -94,6 +99,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select specific fields query (select fieldA, fieldB from dataset) should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldAName = 'foo';
         const fieldBName = 'bar';
@@ -125,6 +131,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -134,6 +141,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select all query with function (select function(field) from dataset) conversion should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldName = 'foo';
         const functionName = 'trim';
@@ -166,6 +174,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -175,6 +184,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select all query with group by function (select * from dataset group by function(field)) should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldName = 'foo';
         const functionName = 'trim';
@@ -221,6 +231,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -230,6 +241,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select all query with group by function with named arguments (select * from dataset group by function(\'name\'="field")) should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldName = 'foo';
         const functionName = 'trim';
@@ -277,6 +289,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -286,6 +299,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select all query with group by function with mixed named and unamed arguments (select count(*) from d88c8f23-36d0-47be-83f4-8574db2ee0a6 group by date_range(field=\'createdAt\',\'format\'=\'yyyy-MM-dd\' ,\'2014-08-18\',\'2014-08-17\',\'now-8d\',\'now-7d\',\'now-6d\',\'now\')) should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldName = 'foo';
         const functionName = 'trim';
@@ -362,6 +376,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -371,6 +386,7 @@ describe('sql2SQL conversion tests', () => {
     });
 
     it('Select \'DISTINCT\' query with \'WHERE\', \'GROUP BY\' and \'ORDER BY\' should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const fieldName = 'foo';
         const query = `SELECT DISTINCT ${fieldName} FROM ${datasetId} WHERE ${fieldName} IS NOT NULL GROUP BY ${fieldName} ORDER BY ${fieldName}`;
@@ -427,6 +443,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query
             });
@@ -437,6 +454,7 @@ describe('sql2SQL conversion tests', () => {
 
 
     it('Query with geostore param should be successful', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId}`;
         const geostore = '89cb48bcd6888a2d4c95df12babff9cc';
@@ -490,7 +508,11 @@ describe('sql2SQL conversion tests', () => {
             }
         };
 
-        nock(process.env.GATEWAY_URL)
+        nock(process.env.GATEWAY_URL, {
+            reqheaders: {
+                'x-api-key': 'api-key-test',
+            }
+        })
             .get(`/v1/geostore/${geostore}`)
             .reply(200, {
                 data: {
@@ -518,6 +540,7 @@ describe('sql2SQL conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2SQL`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query,
                 geostore

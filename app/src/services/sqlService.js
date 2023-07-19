@@ -38,12 +38,15 @@ class SQLService {
         return SQLService.generateError('Malformed query');
     }
 
-    static async obtainGeoStore(id) {
+    static async obtainGeoStore(id, apiKey) {
         try {
             const result = await RWAPIMicroservice.requestToMicroservice({
                 uri: encodeURI(`/v1/geostore/${id}`),
                 method: 'GET',
-                json: true
+                json: true,
+                headers: {
+                    'x-api-key': apiKey,
+                }
             });
 
             const geostore = await new JSONAPIDeserializer({
@@ -82,7 +85,7 @@ class SQLService {
         return geojson;
     }
 
-    static async sql2SQL(data, isRaster = false, experimental = false) {
+    static async sql2SQL(data, apiKey, isRaster = false, experimental = false) {
         logger.debug('Converting sql to sql', data);
         const parsed = new Sql2json(data.sql, experimental).toJSON();
         if (!parsed) {
@@ -95,7 +98,7 @@ class SQLService {
             }
             if (data.geostore) {
                 logger.debug('Contain geostore. Obtaining geojson');
-                const geostore = await SQLService.obtainGeoStore(data.geostore);
+                const geostore = await SQLService.obtainGeoStore(data.geostore, apiKey);
                 logger.debug('Completing query');
                 geojson = geostore.geojson;
             }

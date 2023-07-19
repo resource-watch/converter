@@ -66,6 +66,16 @@ spec:
                   key: FASTLY_SERVICEID
                   name: mssecrets
                   optional: true
+            - name: AWS_REGION
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_REGION
+                  name: mssecrets
+            - name: AWS_API_KEY_USAGE_PLAN_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_API_KEY_USAGE_PLAN_ID
+                  name: mssecrets
           image: gfwdockerhub/converter
           imagePullPolicy: Always
           livenessProbe:

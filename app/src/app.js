@@ -10,12 +10,12 @@ const koaSimpleHealthCheck = require('koa-simple-healthcheck');
 
 const app = new Koa();
 
+app.use(koaSimpleHealthCheck());
 app.use(koaLogger());
 
 app.use(bodyParser({
     jsonLimit: '50mb'
 }));
-app.use(koaSimpleHealthCheck());
 
 // catch errors and send in jsonapi standard. Always return vnd.api+json
 app.use(async (ctx, next) => {
@@ -43,7 +43,10 @@ app.use(RWAPIMicroservice.bootstrap({
     microserviceToken: process.env.MICROSERVICE_TOKEN,
     fastlyEnabled: process.env.FASTLY_ENABLED,
     fastlyServiceId: process.env.FASTLY_SERVICEID,
-    fastlyAPIKey: process.env.FASTLY_APIKEY
+    fastlyAPIKey: process.env.FASTLY_APIKEY,
+    requireAPIKey: process.env.REQUIRE_API_KEY || true,
+    awsRegion: process.env.AWS_REGION,
+    awsCloudWatchLogStreamName: config.get('service.name'),
 }));
 
 

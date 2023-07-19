@@ -10,4 +10,7 @@ services:
       GATEWAY_URL: http://127.0.0.1:9000
       MICROSERVICE_TOKEN: cttoken
       FASTLY_ENABLED: "false"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
     command: test

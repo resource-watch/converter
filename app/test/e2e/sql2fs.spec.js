@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
-const { getTestServer } = require('./test-server');
+const { getTestServer } = require('./utils/test-server');
+const { mockValidateRequestWithApiKey } = require('./utils/helpers');
 
 const should = chai.should();
 
-const requester = getTestServer();
+let requester;
 
 nock.disableNetConnect();
 nock.enableNetConnect(`${process.env.HOST_IP}:${process.env.PORT}`);
@@ -17,10 +18,11 @@ describe('sql2FS conversion tests', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
-        nock.cleanAll();
+        requester = await getTestServer();
     });
 
     it('Order by field with no asc|desc should should up with just the order column name on generated request', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId} ORDER BY y`;
 
@@ -59,6 +61,7 @@ describe('sql2FS conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query,
                 loggedUser: { id: 'microservice' }
@@ -70,6 +73,7 @@ describe('sql2FS conversion tests', () => {
     });
 
     it('Order by field and DESC should be reflected on generated request (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId} ORDER BY y desc`;
 
@@ -108,6 +112,7 @@ describe('sql2FS conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query,
                 loggedUser: { id: 'microservice' }
@@ -119,6 +124,7 @@ describe('sql2FS conversion tests', () => {
     });
 
     it('Order by field and ASC should be reflected on generated request (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId} ORDER BY y asc`;
 
@@ -157,6 +163,7 @@ describe('sql2FS conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query,
                 loggedUser: { id: 'microservice' }
@@ -169,6 +176,7 @@ describe('sql2FS conversion tests', () => {
 
 
     it('Order by multiple fields with ASC|DESC|none should be reflected on generated request (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = '051364f0-fe44-46c2-bf95-fa4b93e2dbd2';
         const query = `SELECT * FROM ${datasetId} ORDER BY x, y asc, z desc`;
 
@@ -219,6 +227,7 @@ describe('sql2FS conversion tests', () => {
 
         const response = await requester
             .post(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .send({
                 sql: query,
                 loggedUser: { id: 'microservice' }

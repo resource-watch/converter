@@ -37,7 +37,7 @@ class ConvertRouter {
         const params = { ...ctx.request.body, ...ctx.query };
         ctx.assert(params.tableName, 400, 'TableName is required');
 
-        const result = await ConverterService.fs2SQL(params);
+        const result = await ConverterService.fs2SQL(params, ctx.request.headers['x-api-key']);
         if (result && result.error) {
             ctx.throw(400, result.message);
             return;
@@ -53,7 +53,7 @@ class ConvertRouter {
         const params = { ...ctx.request.body, ...ctx.query };
         ctx.assert(params.sql, 400, 'SQL param is required');
         params.sql = hack(params.sql); // hack: TODO: fix the parser to support several spaces
-        const result = await ConverterService.sql2FS(params);
+        const result = await ConverterService.sql2FS(params, ctx.request.headers['x-api-key']);
         if (result && result.error) {
             ctx.throw(400, result.message);
             return;
@@ -97,7 +97,7 @@ class ConvertRouter {
         let result;
 
         try {
-            result = await SQLService.sql2SQL(params, ctx.query.raster === 'true', ctx.query.experimental);
+            result = await SQLService.sql2SQL(params, ctx.request.headers['x-api-key'], ctx.query.raster === 'true', ctx.query.experimental);
         } catch (err) {
             logger.error(`Error converting query using sql2SQL service: ${err}`);
             err.status = 400;

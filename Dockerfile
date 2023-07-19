@@ -1,4 +1,4 @@
-FROM node:16.4.0-alpine
+FROM node:20.4-alpine3.18
 MAINTAINER info@vizzuality.com
 
 ENV NAME converter

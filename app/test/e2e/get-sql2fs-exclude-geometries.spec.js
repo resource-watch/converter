@@ -1,11 +1,12 @@
 /* eslint-disable no-unused-vars,no-undef */
 const nock = require('nock');
 const chai = require('chai');
-const { getTestServer } = require('./test-server');
+const { getTestServer } = require('./utils/test-server');
+const { mockValidateRequestWithApiKey } = require('./utils/helpers');
 
 chai.should();
 
-const requester = getTestServer();
+let requester;
 
 nock.disableNetConnect();
 nock.enableNetConnect(`${process.env.HOST_IP}:${process.env.PORT}`);
@@ -17,10 +18,11 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
             throw Error(`Running the test suite with NODE_ENV ${process.env.NODE_ENV} may result in permanent data loss. Please use NODE_ENV=test.`);
         }
 
-        nock.cleanAll();
+        requester = await getTestServer();
     });
 
     it('Query with no excludeGeometries parameter adds no additional parameter to the generated query (happy case)', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = 'atlasprotected_areasMapServer4';
         const query = `SELECT Category_EN, PA_Area_ha_KA FROM ${datasetId} LIMIT 20`;
 
@@ -51,6 +53,7 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
 
         const response = await requester
             .get(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .query({
                 sql: query,
                 loggedUser: { id: 'microservice' }
@@ -61,6 +64,7 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
     });
 
     it('Query with excludeGeometries=false parameter adds no additional parameter to the generated query', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = 'atlasprotected_areasMapServer4';
         const query = `SELECT Category_EN, PA_Area_ha_KA FROM ${datasetId} LIMIT 20`;
 
@@ -91,6 +95,7 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
 
         const response = await requester
             .get(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .query({
                 sql: query,
                 excludeGeometries: false,
@@ -102,6 +107,7 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
     });
 
     it('Query with excludeGeometries=true parameter adds the additional returnGeometry=false parameter to the generated query', async () => {
+        mockValidateRequestWithApiKey({});
         const datasetId = 'atlasprotected_areasMapServer4';
         const query = `SELECT Category_EN, PA_Area_ha_KA FROM ${datasetId} LIMIT 20`;
 
@@ -133,6 +139,7 @@ describe('GET sql2FS conversion tests - excludeGeometries parameter', () => {
 
         const response = await requester
             .get(`/api/v1/convert/sql2FS`)
+            .set('x-api-key', 'api-key-test')
             .query({
                 sql: query,
                 excludeGeometries: true,
