@@ -1,2 +1,1 @@
-// require('heapdump');
-require('app');
+require('app')();

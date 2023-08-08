@@ -7,7 +7,7 @@ let requester;
 
 chai.use(chaiHttp);
 
-exports.getTestServer = function getTestServer() {
+exports.getTestServer = async function getTestServer() {
     if (requester) {
         return requester;
     }
@@ -18,7 +18,8 @@ exports.getTestServer = function getTestServer() {
         logStreamName: config.get('service.name')
     });
 
-    const server = require('../../../src/app');
+    const serverPromise = require('../../../src/app');
+    const { server } = await serverPromise();
     requester = chai.request(server).keepOpen();
 
     return requester;
