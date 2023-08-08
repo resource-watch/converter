@@ -45,6 +45,7 @@ app.use(RWAPIMicroservice.bootstrap({
     fastlyServiceId: process.env.FASTLY_SERVICEID,
     fastlyAPIKey: process.env.FASTLY_APIKEY,
     requireAPIKey: process.env.REQUIRE_API_KEY || true,
+    awsCloudWatchLoggingEnabled: process.env.AWS_CLOUDWATCH_LOGGING_ENABLED || true,
     awsRegion: process.env.AWS_REGION,
     awsCloudWatchLogStreamName: config.get('service.name'),
 }));

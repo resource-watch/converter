@@ -71,10 +71,10 @@ spec:
                 secretKeyRef:
                   key: AWS_REGION
                   name: mssecrets
-            - name: AWS_API_KEY_USAGE_PLAN_ID
+            - name: REQUIRE_API_KEY
               valueFrom:
                 secretKeyRef:
-                  key: AWS_API_KEY_USAGE_PLAN_ID
+                  key: REQUIRE_API_KEY
                   name: mssecrets
           image: gfwdockerhub/converter
           imagePullPolicy: Always
