@@ -8,6 +8,9 @@ services:
       GATEWAY_URL: http://mymachine:9000
       PORT: 4100
       FASTLY_ENABLED: "false"
+      AWS_REGION: "us-east-1"
+      AWS_ACCESS_KEY_ID: "test"
+      AWS_SECRET_ACCESS_KEY: "test"
     command: develop
     volumes:
       - ./app:/opt/converter/app

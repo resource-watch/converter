@@ -8,7 +8,8 @@
     "test-unit": "NODE_PATH=app/src grunt --gruntfile app/Gruntfile.js unitTest",
     "start": "NODE_PATH=app/src node $NODE_DEBUG_OPTION app/index.js",
     "test": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js test",
-    "coverage": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc"
+    "coverage": "NODE_PATH=app/src node $NODE_DEBUG_OPTION ./node_modules/.bin/grunt --gruntfile app/Gruntfile.js nyc",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,7 @@
     "koa"
   ],
   "engines": {
-    "node": "~16"
+    "node": "~20.4"
   },
   "author": "https://github.com/vizzuality",
   "license": "MIT",
@@ -32,47 +33,41 @@
     "arcgis-to-geojson-utils": "1.0.1",
     "bunyan": "1.7.1",
     "config": "^3.2.4",
-    "rw-api-microservice-node": "^4.0.2",
     "jsonapi-serializer": "^3.6.5",
     "koa": "2.11.0",
     "koa-bodyparser": "^4.2.1",
     "koa-logger": "^3.2.1",
     "koa-mount": "^4.0.0",
-    "koa-router": "^7.4.0",
+    "koa-router": "^12.0.1",
     "koa-simple-healthcheck": "^0.0.1",
+    "rw-api-microservice-node": "^5.1.3",
     "sql2json": "2.0.6"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-http": "^4.3.0",
-    "eslint": "^6.6.0",
-    "eslint-config-airbnb": "^18.0.1",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsx-a11y": "^6.2.3",
-    "eslint-plugin-mocha": "^6.2.1",
-    "eslint-plugin-react": "^7.16.0",
-    "grunt": "^1.3.0",
-    "grunt-cli": "^1.3.2",
+    "chai": "^4.3.7",
+    "chai-http": "^4.4.0",
+    "eslint": "^8.45.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-mocha": "^10.1.0",
+    "eslint-plugin-react": "^7.32.2",
+    "grunt": "^1.6.1",
+    "grunt-cli": "^1.4.3",
     "grunt-contrib-watch": "^1.1.0",
     "grunt-express-server": "^0.5.4",
     "grunt-mocha-test": "^0.13.3",
-    "grunt-simple-nyc": "^3.0.0",
-    "husky": ">=1",
-    "lint-staged": ">=8",
+    "grunt-simple-nyc": "^3.0.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3",
     "load-grunt-tasks": "^5.1.0",
-    "mocha": "^6.2.1",
-    "nock": "^11.4.0",
-    "nyc": "^14.1.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
+    "mocha": "^10.2.0",
+    "nock": "^13.3.2",
+    "nyc": "^15.1.0"
   },
   "lint-staged": {
     "*.js": [
-      "eslint --fix",
-      "git add"
+      "eslint --fix"
     ]
   }
 }
